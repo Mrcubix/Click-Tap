@@ -1,10 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ClickTap.ViewModels;
-using ClickTap.Views;
+using ClickTap.UX.ViewModels;
+using ClickTap.UX.Views;
 
-namespace ClickTap;
+namespace ClickTap.UX;
 
 public partial class App : Application
 {

@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace ClickTap.Views;
+namespace ClickTap.UX.Views;
 
 public partial class MainWindow : Window
 {

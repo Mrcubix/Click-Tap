@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using ClickTap.ViewModels;
+using ClickTap.UX.ViewModels;
 
-namespace ClickTap;
+namespace ClickTap.UX;
 
 public class ViewLocator : IDataTemplate
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using Avalonia;
 
-namespace ClickTap.Desktop;
+namespace ClickTap.UX.Desktop;
 
 sealed class Program
 {

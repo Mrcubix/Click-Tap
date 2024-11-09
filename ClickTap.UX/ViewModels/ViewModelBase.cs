@@ -1,6 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace ClickTap.ViewModels;
+namespace ClickTap.UX.ViewModels;
 
 public class ViewModelBase : ObservableObject
 {
