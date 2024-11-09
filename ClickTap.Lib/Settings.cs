@@ -4,11 +4,17 @@ using System.IO;
 using Newtonsoft.Json;
 using OpenTabletDriver.Plugin;
 using ClickTap.Lib.Converters;
+using ClickTap.Lib.Entities.Serializable;
+using System.Reflection;
 using ClickTap.Lib.Entities.Bindable;
+using ClickTap.Lib.Bindings;
 
 namespace ClickTap.Lib
 {
-    public class Settings
+    public class Settings<TProfile, TState, Tthreshold>
+        where TProfile : BindableProfile<TState, Tthreshold>, new()
+        where TState : Binding
+        where Tthreshold : ThresholdBinding
     {
         #region Constants
         
@@ -40,13 +46,13 @@ namespace ClickTap.Lib
         public int Version { get; set; } = 1;
 
         [JsonProperty]
-        public List<BindableProfile> Profiles { get; set; } = new();
+        public List<TProfile> Profiles { get; set; } = new();
 
         #endregion
 
         #region Methods
 
-        public static bool TryLoadFrom(string path, out Settings? settings)
+        public static bool TryLoadFrom(string path, out Settings<TProfile, TState, Tthreshold>? settings)
         {
             settings = null!;
 
@@ -55,7 +61,7 @@ namespace ClickTap.Lib
                 try
                 {
                     var serialized = File.ReadAllText(path);
-                    settings = JsonConvert.DeserializeObject<Settings>(serialized, _serializerSettings)!;
+                    settings = JsonConvert.DeserializeObject<Settings<TProfile, TState, Tthreshold>>(serialized, _serializerSettings)!;
 
                     return true;
                 }
@@ -81,11 +87,33 @@ namespace ClickTap.Lib
                 profile.ConstructBindings();
         }
 
+        public void FromSerializable(SerializableSettings settings, Dictionary<int, TypeInfo> identifierToPlugin)
+        {
+            foreach (var serializableProfile in settings.Profiles)
+            {
+                var profile = new TProfile();
+                profile.FromSerializable(serializableProfile, identifierToPlugin);
+
+                Profiles.Add(profile);
+            }
+        }
+
+        public SerializableSettings ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)
+        {
+            var result = new SerializableSettings();
+
+            foreach (var profile in Profiles)
+                if (profile.ToSerializable(identifierToPlugin) is SerializableProfile serializableProfile)
+                    result.Profiles.Add(serializableProfile);
+
+            return result;
+        }
+
         #endregion
 
         #region Static Properties
 
-        public static Settings Default => new();
+        public static Settings<TProfile, TState, Tthreshold> Default => new();
 
         #endregion
     }

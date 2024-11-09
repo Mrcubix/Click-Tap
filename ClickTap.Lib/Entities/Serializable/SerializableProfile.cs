@@ -1,55 +1,60 @@
+using System;
+using ClickTap.Lib.Entities.Serializable.Bindings;
+using ClickTap.Lib.Tablet;
 using Newtonsoft.Json;
 
 namespace ClickTap.Lib.Entities.Serializable
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class SerializableProfile
+    public class SerializableProfile : ITabletProfile
     {
+        #region Properties
+
         [JsonProperty]
         public string Name { get; set; } = string.Empty;
 
-        #region Methods
+        [JsonProperty]
+        public SerializableThresholdBinding? Tip { get; set; }
 
-        public void Add()
-        {
-            
-        }
+        [JsonProperty]
+        public SerializableThresholdBinding? Eraser { get; set; }
 
-        public void Remove()
-        {
-            
-        }
+        [JsonProperty]
+        public SerializableBinding?[] PenButtons { get; set; } = Array.Empty<SerializableBinding>();
+
+        [JsonProperty]
+        public SerializableBinding?[] AuxButtons { get; set; } = Array.Empty<SerializableBinding>();
+
+        [JsonProperty]
+        public SerializableBinding?[] MouseButtons { get; set; } = Array.Empty<SerializableBinding>();
+
+        [JsonProperty]
+        public SerializableBinding? MouseScrollUp { get; set; }
+
+        [JsonProperty]
+        public SerializableBinding? MouseScrollDown { get; set; }
 
         #endregion
 
-        #region IEnumerable Implementation
+        #region Methods
 
-        /// <returns>Returns an enumerator where all gestures are aggregated.</returns>
-        /*public IEnumerator<Gesture> GetEnumerator()
+        public void Clear()
         {
-            foreach (var tapGesture in TapGestures)
-                yield return tapGesture;
-
-            foreach (var holdGesture in HoldGestures)
-                yield return holdGesture;
-
-            foreach (var swipeGesture in SwipeGestures)
-                yield return swipeGesture;
-
-            foreach (var panGesture in PanGestures)
-                yield return panGesture;
-
-            foreach (var pinchGesture in PinchGestures)
-                yield return pinchGesture;
-
-            foreach (var rotateGesture in RotateGestures)
-                yield return rotateGesture;
+            Tip = null;
+            Eraser = null;
+            Array.Fill(PenButtons, null);
+            Array.Fill(AuxButtons, null);
+            Array.Fill(MouseButtons, null);
+            MouseScrollUp = null;
+            MouseScrollDown = null;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public void MatchSpecifications(SharedTabletReference tabletSpecifications)
         {
-            return GetEnumerator();
-        }*/
+            PenButtons = new SerializableBinding?[tabletSpecifications.Pen?.Buttons?.ButtonCount ?? 0];
+            AuxButtons = new SerializableBinding?[tabletSpecifications.AuxButtons?.ButtonCount ?? 0];
+            MouseButtons = new SerializableBinding?[tabletSpecifications.MouseButtons?.ButtonCount ?? 0];
+        }
 
         #endregion
     }

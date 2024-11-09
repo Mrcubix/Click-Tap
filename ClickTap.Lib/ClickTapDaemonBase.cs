@@ -13,15 +13,19 @@ using ClickTap.Lib.Converters;
 using ClickTap.Lib.Tablet;
 using ClickTap.Lib.Entities.Bindable;
 using ClickTap.Lib.Entities.Serializable;
+using ClickTap.Lib.Bindings;
 
 #nullable enable
 
 namespace ClickTap.Lib
 {
-    public class ClickTapDaemonBase : IDisposable
+    public class ClickTapDaemonBase<Tprofile, TState, Tthreshold> : IDisposable
+        where Tprofile : BindableProfile<TState, Tthreshold>, new()
+        where TState : Binding
+        where Tthreshold : ThresholdBinding
     {
-        protected static RpcServer<ClickTapDaemonBase> _rpcServer = null!;
-        public static ClickTapDaemonBase Instance { get; protected set; } = null!;
+        protected static RpcServer<ClickTapDaemonBase<Tprofile, TState, Tthreshold>>? _rpcServer = null!;
+        public static ClickTapDaemonBase<Tprofile, TState, Tthreshold>? Instance { get; protected set; } = null!;
         public static event EventHandler? DaemonLoaded;
 
         #region Constants
@@ -61,7 +65,7 @@ namespace ClickTap.Lib
                 return false;
             }
 
-            _ = Task.Run(() => _rpcServer.MainAsync());
+            _ = Task.Run(() => _rpcServer?.MainAsync());
 
             Log.Write(PLUGIN_NAME, "Initialized");
 
@@ -75,7 +79,7 @@ namespace ClickTap.Lib
 
             if (HasErrored)
             {
-                Log.Write("Gestures Daemon", "Failed to load settings, aborting initialization.");
+                Log.Write(PLUGIN_NAME, "Failed to load settings, aborting initialization.");
                 return;
             }
 
@@ -85,7 +89,7 @@ namespace ClickTap.Lib
             // construct bindings
             //TouchGestureSettings?.ConstructBindings();
 
-            SettingsChanged?.Invoke(this, TouchGestureSettings);
+            SettingsChanged?.Invoke(this, ClickTapSettings);
 
             IsReady = true;
             Ready?.Invoke(this, null!);
@@ -119,7 +123,7 @@ namespace ClickTap.Lib
         #region Events
 
         public event EventHandler? Ready;
-        public event EventHandler<Settings?>? SettingsChanged;
+        public event EventHandler<Settings<Tprofile, TState, Tthreshold>?>? SettingsChanged;
         public event EventHandler<IEnumerable<SharedTabletReference>>? TabletsChanged;
 
         protected event EventHandler<SharedTabletReference>? TabletAdded;
@@ -131,7 +135,7 @@ namespace ClickTap.Lib
 
         public Dictionary<int, TypeInfo> IdentifierToPluginConversion = new();
 
-        public Settings? TouchGestureSettings { get; protected set; } = Settings.Default;
+        public Settings<Tprofile, TState, Tthreshold>? ClickTapSettings { get; protected set; } = Settings<Tprofile, TState, Tthreshold>.Default;
 
         public bool IsReady { get; protected set; }
 
@@ -146,14 +150,14 @@ namespace ClickTap.Lib
         /// </summary>
         /// <param name="name">The name of the tablet.</param>
         /// <returns>The settings for the tablet.</returns>
-        public virtual BindableProfile GetSettingsForTablet(string name)
+        public virtual BindableProfile<TState, Tthreshold> GetSettingsForTablet(string name)
         {
             var tablet = _tablets.Find(t => t.Name == name);
 
             if (tablet == null)
                 return null!;
 
-            return TouchGestureSettings?.Profiles.Find(p => p.Name == tablet.Name) ?? CreateProfileForTablet(tablet);
+            return ClickTapSettings?.Profiles.Find(p => p.Name == tablet.Name) ?? CreateProfileForTablet(tablet);
         }
 
         public void AddTablet(SharedTabletReference tablet)
@@ -187,24 +191,26 @@ namespace ClickTap.Lib
                 RemoveTablet(tablet);
         }
 
-        private BindableProfile CreateProfileForTablet(SharedTabletReference tablet)
+        private BindableProfile<TState, Tthreshold> CreateProfileForTablet(SharedTabletReference tablet)
         {
-            if (TouchGestureSettings == null)
+            if (ClickTapSettings == null)
                 return null!;
 
-            var profile = new BindableProfile
+            var profile = new Tprofile
             {
                 Name = tablet.Name
             };
 
-            TouchGestureSettings.Profiles.Add(profile);
+            profile.MatchSpecifications(tablet);
+
+            ClickTapSettings.Profiles.Add(profile);
 
             return profile;
         }
 
         private void BuildProfileBindings(SharedTabletReference tablet)
         {
-            var profile = TouchGestureSettings?.Profiles.Find(p => p.Name == tablet.Name);
+            var profile = ClickTapSettings?.Profiles.Find(p => p.Name == tablet.Name);
 
             if (profile == null)
                 return;
@@ -217,24 +223,24 @@ namespace ClickTap.Lib
             if (!File.Exists(path))
                 SaveSettingsCore();
 
-            HasErrored = !Settings.TryLoadFrom(path, out var temp);
+            HasErrored = !Settings<Tprofile, TState, Tthreshold>.TryLoadFrom(path, out var temp);
 
             if (!HasErrored)
-                TouchGestureSettings = temp;
+                ClickTapSettings = temp;
         }
 
         private bool SaveSettingsCore()
         {
-            Log.Write("Gestures Daemon", "Saving settings...");
+            Log.Write(PLUGIN_NAME, "Saving settings...");
 
             try
             {
-                File.WriteAllText(_settingsPath, JsonConvert.SerializeObject(TouchGestureSettings, _serializerSettings));
+                File.WriteAllText(_settingsPath, JsonConvert.SerializeObject(ClickTapSettings, _serializerSettings));
                 return true;
             }
             catch (Exception e)
             {
-                Log.Write("Gestures Daemon", $"Failed to save settings: {e.Message}", LogLevel.Error);
+                Log.Write(PLUGIN_NAME, $"Failed to save settings: {e.Message}", LogLevel.Error);
             }
 
             return false;
@@ -247,7 +253,7 @@ namespace ClickTap.Lib
         protected virtual void OnReady(EventArgs e)
             => Ready?.Invoke(this, e);
 
-        protected virtual void OnSettingsChanged(Settings settings)
+        protected virtual void OnSettingsChanged(Settings<Tprofile, TState, Tthreshold> settings)
             => SettingsChanged?.Invoke(this, settings);
 
         protected virtual void OnTabletsChanged(IEnumerable<SharedTabletReference> tablets)
@@ -276,7 +282,7 @@ namespace ClickTap.Lib
         /// <inheritdoc />
         public virtual Task<bool> IsTabletConnected()
         {
-            Log.Write("Gestures Daemon", "Checking if tablet is connected...");
+            Log.Write(PLUGIN_NAME, "Checking if tablet is connected...");
 
             return Task.FromResult(_tablets.Any());
         }
@@ -287,32 +293,23 @@ namespace ClickTap.Lib
             if (!_tablets.Any())
                 return Task.FromResult(Array.Empty<SharedTabletReference>().AsEnumerable());
 
-            Log.Write("Gestures Daemon", "Getting tablets...");
+            Log.Write(PLUGIN_NAME, "Getting tablets...");
 
             return Task.FromResult(_tablets.AsEnumerable());
         }
 
         /// <inheritdoc />
-        public virtual Task<Vector2> GetTabletSize()
-            => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public virtual Task<Vector2> GetTabletLinesPerMM()
-            => throw new NotImplementedException();
-
-        /// <inheritdoc />
         public virtual Task<SerializableSettings> GetSettings()
         {
-            Log.Write("Gestures Daemon", "Converting Settings into a serializable form...");
+            Log.Write(PLUGIN_NAME, "Converting Settings into a serializable form...");
 
-            if (TouchGestureSettings == null)
+            if (ClickTapSettings == null)
                 return Task.FromResult<SerializableSettings>(null!);
 
             // TODO: Build the serializable settings from bindable (probably)
-            //var serializedSettings = Settings.ToSerializable(TouchGestureSettings, IdentifierToPluginConversion);
+            var serializedSettings = ClickTapSettings.ToSerializable(IdentifierToPluginConversion);
 
-            //return Task.FromResult(serializedSettings);
-            return Task.FromResult<SerializableSettings>(null!);
+            return Task.FromResult(serializedSettings);
         }
 
         /// <inheritdoc />
@@ -321,14 +318,14 @@ namespace ClickTap.Lib
         /// <inheritdoc />
         public virtual Task<bool> UpdateSettings(SerializableSettings settings)
         {
-            Log.Write("Gestures Daemon", "Updating settings...");
+            Log.Write(PLUGIN_NAME, "Updating settings...");
 
             if (settings == null)
                 return Task.FromResult(false);
 
             // TODO: Build the settings from serializable
             //TouchGestureSettings = Settings.FromSerializable(settings, IdentifierToPluginConversion);
-            SettingsChanged?.Invoke(this, TouchGestureSettings);
+            SettingsChanged?.Invoke(this, ClickTapSettings);
 
             return Task.FromResult(true);
         }
@@ -336,12 +333,12 @@ namespace ClickTap.Lib
         /// <inheritdoc />
         public virtual Task<bool> UpdateProfile(SerializableProfile profile)
         {
-            Log.Write("Gestures Daemon", "Updating profile...");
+            Log.Write(PLUGIN_NAME, "Updating profile...");
 
             if (profile == null)
                 return Task.FromResult(false);
 
-            var bindableProfile = TouchGestureSettings?.Profiles.Find(p => p.Name == profile.Name);
+            var bindableProfile = ClickTapSettings?.Profiles.Find(p => p.Name == profile.Name);
             var tablet = _tablets.Find(t => t.Name == profile.Name);
 
             if (bindableProfile == null || tablet == null)
@@ -352,14 +349,6 @@ namespace ClickTap.Lib
             return Task.FromResult(true);
         }
 
-        /// <inheritdoc />
-        public virtual Task<bool> StartRecording()
-            => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public virtual Task<bool> StopRecording()
-            => throw new NotImplementedException();
-
         #endregion
 
         #region Disposal
@@ -367,7 +356,7 @@ namespace ClickTap.Lib
         public virtual void Dispose()
         {
             _tablets.Clear();
-            _rpcServer.Dispose();
+            _rpcServer?.Dispose();
 
             GC.SuppressFinalize(this);
         }

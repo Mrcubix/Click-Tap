@@ -2,8 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <NoWarn>$(NoWarn); NETSDK1138; VSTHRD200</NoWarn>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn)</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">

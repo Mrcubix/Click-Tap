@@ -1,3 +1,4 @@
+using ClickTap.Lib.Tablet;
 using Newtonsoft.Json;
 
 namespace ClickTap.Lib.Entities
@@ -10,14 +11,8 @@ namespace ClickTap.Lib.Entities
         [JsonProperty]
         string Name { get; }
 
-        /// <summary>
-        ///   
-        /// </summary>
-        void Add();
+        public void Clear();
 
-        /// <summary>
-        ///   
-        /// </summary>
-        void Remove();
+        public void MatchSpecifications(SharedTabletReference tabletSpecifications);
     }
 }

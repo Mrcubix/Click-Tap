@@ -1,26 +1,26 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using ClickTap.Lib;
 using OpenTabletDriver.Desktop.Reflection;
 using OpenTabletDriver.External.Common.RPC;
 using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
-using ClickTap.Lib.Converters;
 using ClickTap.Lib.Extensions;
+using ClickTap.Entities;
+using ClickTap.Bindings;
 
 namespace TouchGestures
 {
+    public class BulletproofClickTapDaemonBase : ClickTapDaemonBase<BulletproofBindableProfile, 
+                                                                    BulletproofBinding, 
+                                                                    BulletproofThresholdBinding> { }
+
     /// <summary>
     ///   Manages settings for each tablets as well as the RPC server.
     /// </summary>
     [PluginName(PLUGIN_NAME)]
-    public class ClickTapDaemon : ClickTapDaemonBase, ITool
+    public class ClickTapDaemon : BulletproofClickTapDaemonBase, ITool
     {
         #region Constructors
 
@@ -29,7 +29,9 @@ namespace TouchGestures
 #if DEBUG
             WaitForDebugger();
 #endif
-            _rpcServer ??= new RpcServer<ClickTapDaemonBase>("GesturesDaemon", this);
+            _rpcServer ??= new RpcServer<ClickTapDaemonBase<BulletproofBindableProfile, 
+                                                            BulletproofBinding, 
+                                                            BulletproofThresholdBinding>>("ClickTapDaemon", this);
             Instance ??= this;
         }
         
@@ -49,7 +51,7 @@ namespace TouchGestures
 
         public override Task<List<SerializablePlugin>> GetPlugins()
         {
-            Log.Write("Gestures Daemon", "Getting plugins...");
+            Log.Write(PLUGIN_NAME, "Getting plugins...");
 
             List<SerializablePlugin> plugins = new();
 
@@ -80,19 +82,9 @@ namespace TouchGestures
                 plugins.Add(serializablePlugin);
             }
 
-            Log.Write("Gestures Daemon", $"Found {plugins.Count} Usable Bindings Plugins.");
+            Log.Write(PLUGIN_NAME, $"Found {plugins.Count} Usable Bindings Plugins.");
 
             return Task.FromResult(plugins);
-        }
-
-        public override Task<bool> StartRecording()
-        {
-            return Task.FromResult(true);
-        }
-
-        public override Task<bool> StopRecording()
-        {
-            return Task.FromResult(true);
         }
 
         #endregion
