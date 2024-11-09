@@ -1,0 +1,12 @@
+<Project>
+
+    <Target Name="FixProjectNullability" AfterTargets="RemoveSecurityAudits" Condition="'$(PackageId)' == 'OpenTabletDriver.Desktop-net6.0'">
+    
+        <PropertyGroup>
+            <Nullable>disable</Nullable>
+        </PropertyGroup>
+    
+        <Message Importance="High" Text="Disabled Nullable in Assembly '$(AssemblyName)'." />
+    </Target>
+
+</Project>

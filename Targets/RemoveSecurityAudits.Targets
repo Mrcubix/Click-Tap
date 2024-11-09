@@ -6,7 +6,7 @@
             <NuGetAuditLevel>critical</NuGetAuditLevel>
         </PropertyGroup>
     
-        <Message Importance="High" Text="Removed security warnings for package with non-critical severity in Assembly '$(AssemblyName)'." />
+        <Message Importance="High" Text="Removed security warnings for package with non-critical severity in Package '$(PackageId)'." />
     </Target>
 
 </Project>

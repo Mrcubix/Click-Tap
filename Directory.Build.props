@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <NoWarn>$(NoWarn); NETSDK1138</NoWarn>
-    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn); NETSDK1138; VSTHRD200</NoWarn>
     <AvaloniaVersion>11.0.10</AvaloniaVersion>
   </PropertyGroup>
 
   <Import Project="Targets/FixPackageId.targets" />
   <Import Project="Targets/RemoveSecurityAudits.targets" />
+  <Import Project="Targets/FixProjectNullability.targets" />
 </Project>
