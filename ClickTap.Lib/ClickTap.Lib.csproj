@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <NoWarn>$(NoWarn); NETSDK1138; VSTHRD200</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" PrivateAssets="all" Nullable="disable">
+      <SetTargetFramework>TargetFramework=net5.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Only for OTD 0.6.x (Running on .NET 6) -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <ProjectReference Include="../.modules/OpenTabletDriver-0.6.x/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" PrivateAssets="all" Nullable="disable">
+      <SetTargetFramework>TargetFramework=net6.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../.modules/OpenTabletDriver.External/OpenTabletDriver.External.Common/OpenTabletDriver.External.Common.csproj" Nullable="disable" />
+  </ItemGroup>
+
+</Project>

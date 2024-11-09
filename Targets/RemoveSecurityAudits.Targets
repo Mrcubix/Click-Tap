@@ -1,0 +1,12 @@
+<Project>
+
+    <Target Name="RemoveSecurityAudits" AfterTargets="FixPackageId" Condition="'$(PackageId)' == 'OpenTabletDriver.Desktop-net5.0'">
+    
+        <PropertyGroup>
+            <NuGetAuditLevel>critical</NuGetAuditLevel>
+        </PropertyGroup>
+    
+        <Message Importance="High" Text="Removed security warnings for package with non-critical severity in Assembly '$(AssemblyName)'." />
+    </Target>
+
+</Project>

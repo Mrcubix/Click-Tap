@@ -1,0 +1,9 @@
+[submodule ".modules/OpenTabletDriver.External"]
+	path = .modules/OpenTabletDriver.External
+	url = https://github.com/Mrcubix/OpenTabletDriver.External.git
+[submodule "OpenTablerDriver"]
+	path = .modules/OpenTabletDriver
+	url = https://github.com/OpenTabletDriver/OpenTabletDriver.git
+[submodule "OpenTablerDriver-0.6.x"]
+	path = .modules/OpenTabletDriver-0.6.x
+	url = https://github.com/OpenTabletDriver/OpenTabletDriver.git
