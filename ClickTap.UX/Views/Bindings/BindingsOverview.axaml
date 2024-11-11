@@ -18,8 +18,8 @@
         <!-- Pen Settings (When Available) -->
         <views:PenSettingsView DataContext="{Binding PenSettings}" Grid.Row="1" IsVisible="{Binding IsEnabled}" />
 
-        <!-- Mouse Settings (When Available) -->
-        <views:MouseSettingsView DataContext="{Binding MouseSettings}" Grid.Row="2" IsVisible="{Binding IsEnabled}" />
+        <!-- Mouse Settings (When Available) In the case of Click & Tap however, we don't need this -->
+        <!--<views:MouseSettingsView DataContext="{Binding MouseSettings}" Grid.Row="2" IsVisible="{Binding IsEnabled}" />-->
 
         <!-- Auxiliary Settings (When Available) -->
         <views:AuxiliarySettingsView DataContext="{Binding AuxiliarySettings}" Grid.Row="3" IsVisible="{Binding IsEnabled}" />
