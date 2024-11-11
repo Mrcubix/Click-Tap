@@ -1,7 +1,6 @@
 using System.Reflection;
 using ClickTap.Lib.Entities.Serializable;
 using OpenTabletDriver.Desktop.Reflection;
-using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
 using ClickTap.Lib.Bindings;
@@ -11,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace ClickTap.Bindings
 {
-    public class BulletproofBinding : Binding
+    public class BulletproofBinding : Binding, IBulletproofBinding
     {
         public BulletproofBinding() { }
 

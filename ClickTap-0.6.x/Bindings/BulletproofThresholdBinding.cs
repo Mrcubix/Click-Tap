@@ -1,17 +1,17 @@
 using System.Reflection;
 using ClickTap.Lib.Entities.Serializable;
 using OpenTabletDriver.Desktop.Reflection;
-using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
 using ClickTap.Lib.Bindings;
 using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.Lib.Extensions;
 using OpenTabletDriver.Plugin.Attributes;
+using Newtonsoft.Json;
 
 namespace ClickTap.Bindings
 {
-    public class BulletproofThresholdBinding : ThresholdBinding
+    public class BulletproofThresholdBinding : ThresholdBinding, IBulletproofBinding
     {
         public BulletproofThresholdBinding() { }
 
@@ -25,6 +25,8 @@ namespace ClickTap.Bindings
 
         public IServiceManager? Provider { get; set; }
         public TabletReference? Tablet { get; set; }
+
+        [JsonProperty]
         public PluginSettingStore? Store { get; set; }
 
         public IBinding? Binding { get; protected set; }
