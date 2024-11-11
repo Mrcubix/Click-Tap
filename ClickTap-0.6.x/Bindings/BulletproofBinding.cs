@@ -82,7 +82,7 @@ namespace ClickTap.Bindings
         public override void FromSerializable(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin)
         {
             // The plugin might not be installed anymore or isn't loaded 
-            if (identifierToPlugin.TryGetValue(binding.Identifier, out var typeInfo))
+            if (identifierToPlugin.TryGetValue(binding.Identifier, out var typeInfo) == false)
                 return;
 
             var store = new PluginSettingStore(typeInfo);
