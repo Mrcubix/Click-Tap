@@ -83,6 +83,8 @@ namespace ClickTap.Entities
             if (profile.MouseScrollDown != null)
                 MouseScrollDown = new BulletproofBinding(profile.MouseScrollDown, identifierToPlugin);
 
+            SetTablet(tablet);
+
             ConstructBindings(tablet);
         }
 

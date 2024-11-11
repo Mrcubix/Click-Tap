@@ -16,8 +16,8 @@ namespace ClickTap.Bindings
 
         public BulletproofBinding(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin,
                                   TabletReference? tablet = null, IServiceManager? provider = null)
-            : base(binding, identifierToPlugin) 
-        { 
+            : base(binding, identifierToPlugin)
+        {
             Tablet = tablet;
             Provider = provider;
         }
@@ -46,13 +46,36 @@ namespace ClickTap.Bindings
 
         public override SerializableBinding ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)
         {
-            var identifier = identifierToPlugin.FirstOrDefault(x => x.Value.FullName == Store?.Path);
-            var value = Store?.Settings.FirstOrDefault(x => x.Property == "Property");
+            if (Store == null)
+                return null!;
+
+            var pluginKeyPair = identifierToPlugin.FirstOrDefault(x => x.Value == Store.GetTypeInfo());
+
+            var identifier = pluginKeyPair.Key;
+            var plugin = pluginKeyPair.Value;
+            string? value;
+
+            if (Store.Settings.Count == 1)
+                value = Store.Settings[0].GetValue<string?>();
+            else
+            {
+                var valueProperty = plugin.FindPropertyWithAttribute<PropertyAttribute>();
+                var validatedProperty = plugin.FindPropertyWithAttribute<PropertyValidatedAttribute>();
+
+                if (valueProperty == null || validatedProperty == null)
+                    return null!;
+
+                // surely they are the same property
+                if (valueProperty != validatedProperty)
+                    return null!;
+
+                value = Store.Settings.FirstOrDefault(x => x.Property == valueProperty.Name)?.GetValue<string?>();
+            }
 
             return new SerializableBinding()
             {
-                Identifier = identifier.Key,
-                Value = value?.GetValue<string?>()
+                Identifier = identifier,
+                Value = value
             };
         }
 
