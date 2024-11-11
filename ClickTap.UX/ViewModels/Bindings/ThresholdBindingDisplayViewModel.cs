@@ -30,7 +30,7 @@ public partial class ThresholdBindingDisplayViewModel : StateBindingDisplayViewM
 
     public ThresholdBindingDisplayViewModel(SerializableThresholdBinding settings) : base(settings)
     {
-        ActivationThreshold = settings.ActivationThreshold;
+        ActivationThreshold = settings?.ActivationThreshold ?? 0f;
     }
 
     #endregion

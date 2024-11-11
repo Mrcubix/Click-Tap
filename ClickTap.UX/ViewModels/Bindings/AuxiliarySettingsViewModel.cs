@@ -54,13 +54,12 @@ namespace ClickTap.UX.ViewModels.Bindings
             for (var i = 0; i < profile.AuxButtons.Length; i++)
             {
                 SerializableBinding? settings = profile.AuxButtons[i];
-                settings ??= new(string.Empty, 0); // Default to no binding
 
-                profile.AuxButtons[i] ??= settings;
-
-                var bindingDisplay = SetupNewBindingDisplay(settings);
-                bindingDisplay.Description = GetDescriptionForIndex(i);
-                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
+                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                {
+                    Description = GetDescriptionForIndex(i),
+                    Content = GetFriendlyContentFromProperty(settings, plugins)
+                };
 
                 Bindings.Add(bindingDisplay);
             }
@@ -104,17 +103,6 @@ namespace ClickTap.UX.ViewModels.Bindings
         #endregion
 
         #region Static Methods
-
-        // Get Settings
-
-        public static StateBindingDisplayViewModel SetupNewBindingDisplay(SerializableBinding settings)
-        {
-            return settings switch
-            {
-                SerializableThresholdBinding thresholdPluginSettings => new ThresholdBindingDisplayViewModel(thresholdPluginSettings),
-                _ => new StateBindingDisplayViewModel(settings)
-            };
-        }
 
         public static string GetFriendlyContentFromProperty(SerializablePluginSettings? property, IList<SerializablePlugin> plugins)
         {

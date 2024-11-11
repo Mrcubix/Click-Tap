@@ -45,34 +45,31 @@ namespace ClickTap.UX.ViewModels.Bindings
             for (var i = 0; i < profile.PenButtons.Length; i++)
             {
                 SerializableBinding? settings = profile.PenButtons[i];
-                settings ??= new(string.Empty, 0); // Default to no binding
 
-                profile.PenButtons[i] ??= settings;
-
-                var bindingDisplay = SetupNewBindingDisplay(settings);
-                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
-                bindingDisplay.Description = GetDescriptionForIndex(i);
+                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                {
+                    Content = GetFriendlyContentFromProperty(settings, plugins),
+                    Description = GetDescriptionForIndex(i)
+                };
 
                 Bindings.Add(bindingDisplay);
             }
 
-            var tipSettings = profile.Tip ?? new SerializableThresholdBinding(string.Empty, 0, 0);
-            var eraserSettings = profile.Eraser ?? new SerializableThresholdBinding(string.Empty, 0, 0);
-
-            profile.Tip ??= tipSettings;
-            profile.Eraser ??= eraserSettings;
-
             // Tip
-            TipBindingDisplay = (ThresholdBindingDisplayViewModel)SetupNewBindingDisplay(tipSettings);
-            TipBindingDisplay.Content = GetFriendlyContentFromProperty(tipSettings, plugins);
-            TipBindingDisplay.Description = "Tip Binding";
-            TipBindingDisplay.ThresholdDescription = "Tip Threshold";
+            TipBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Tip!)
+            {
+                Content = GetFriendlyContentFromProperty(profile.Tip, plugins),
+                Description = "Tip Binding",
+                ThresholdDescription = "Tip Threshold"
+            };
 
             // Eraser
-            EraserBindingDisplay = (ThresholdBindingDisplayViewModel)SetupNewBindingDisplay(eraserSettings);
-            EraserBindingDisplay.Content = GetFriendlyContentFromProperty(eraserSettings, plugins);
-            EraserBindingDisplay.Description = "Eraser Binding";
-            EraserBindingDisplay.ThresholdDescription = "Eraser Threshold";
+            EraserBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Eraser!)
+            {
+                Content = GetFriendlyContentFromProperty(profile.Eraser, plugins),
+                Description = "Eraser Binding",
+                ThresholdDescription = "Eraser Threshold"
+            };
 
             SubscribeToEvents();
 

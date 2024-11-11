@@ -165,23 +165,24 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         // https://101.wacom.com/userhelp/en/AdvancedOptions.htm
         // https://github.com/OpenTabletDriver/OpenTabletDriver/issues/3165
 
-        if (report is ITabletReport tabletReport)
-            HandleTabletReport(Tablet, Tablet.Properties.Specifications.Pen, tabletReport);
         if (report is IAuxReport auxReport)
             HandleAuxiliaryReport(Tablet, auxReport);
         if (report is IMouseReport mouseReport)
             HandleMouseReport(Tablet, mouseReport);
+        if (report is ITabletReport tabletReport)
+            HandleTabletReport(Tablet, Tablet.Properties.Specifications.Pen, tabletReport);
     }
 
     private void HandleTabletReport(TabletReference tablet, PenSpecifications pen, ITabletReport report)
     {
+        // We handle pen buttons first, as the Tip and Eraser need to be handled separately from them
+        HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
+
         float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
             _profile?.Eraser?.Invoke(pressurePercent);
         else
             _profile?.Tip?.Invoke(pressurePercent);
-
-        HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
     }
 
     private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)

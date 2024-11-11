@@ -334,7 +334,7 @@ namespace ClickTap.Lib
         /// <inheritdoc />
         public virtual Task<bool> UpdateProfile(SerializableProfile profile)
         {
-            Log.Write(PLUGIN_NAME, "Updating profile...");
+            Log.Write(PLUGIN_NAME, $"Updating profile for {profile.Name}...");
 
             if (profile == null)
                 return Task.FromResult(false);

@@ -44,31 +44,28 @@ namespace ClickTap.UX.ViewModels.Bindings
             for (var i = 0; i < profile.MouseButtons.Length; i++)
             {
                 SerializableBinding? settings = profile.MouseButtons[i];
-                settings ??= new(string.Empty, 0); // Default to no binding
 
-                profile.MouseButtons[i] ??= settings;
-
-                var bindingDisplay = SetupNewBindingDisplay(settings);
-                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
-                bindingDisplay.Description = GetDescriptionForIndex(i);
+                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                {
+                    Content = GetFriendlyContentFromProperty(settings, plugins),
+                    Description = GetDescriptionForIndex(i)
+                };
 
                 Bindings.Add(bindingDisplay);
             }
 
-            var mouseScrollUpSettings = profile.MouseScrollUp ?? new(string.Empty, 0);
-            var mouseScrollDownSettings = profile.MouseScrollDown ?? new(string.Empty, 0);
-
-            profile.MouseScrollUp ??= mouseScrollUpSettings;
-            profile.MouseScrollDown ??= mouseScrollDownSettings;
-
             // Scroll Wheel
-            MouseScrollUpBindingDisplay = SetupNewBindingDisplay(mouseScrollUpSettings);
-            MouseScrollUpBindingDisplay.Content = GetFriendlyContentFromProperty(mouseScrollUpSettings, plugins);
-            MouseScrollUpBindingDisplay.Description = "Scroll Up";
+            MouseScrollUpBindingDisplay = new StateBindingDisplayViewModel(profile.MouseScrollUp!);
+            {
+                MouseScrollUpBindingDisplay.Content = GetFriendlyContentFromProperty(profile.MouseScrollUp!, plugins);
+                MouseScrollUpBindingDisplay.Description = "Scroll Up";
+            }
 
-            MouseScrollDownBindingDisplay = SetupNewBindingDisplay(mouseScrollDownSettings);
-            MouseScrollDownBindingDisplay.Content = GetFriendlyContentFromProperty(mouseScrollDownSettings, plugins);
-            MouseScrollDownBindingDisplay.Description = "Scroll Down";
+            MouseScrollDownBindingDisplay = new StateBindingDisplayViewModel(profile.MouseScrollDown!);
+            {
+                MouseScrollDownBindingDisplay.Content = GetFriendlyContentFromProperty(profile.MouseScrollUp!, plugins);
+                MouseScrollDownBindingDisplay.Description = "Scroll Down";
+            }
 
             SubscribeToEvents();
 

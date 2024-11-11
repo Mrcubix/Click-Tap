@@ -48,7 +48,7 @@ namespace ClickTap.Entities
 
         public override void Update(SerializableProfile profile, SharedTabletReference tablet, Dictionary<int, TypeInfo> identifierToPlugin)
         {
-            FromSerializable(profile, identifierToPlugin, tablet, this);
+            FromSerializable(profile, identifierToPlugin, tablet);
             OnProfileChanged();
         }
 
