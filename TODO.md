@@ -1,10 +1,11 @@
 ## Plugin 
 
-- [ ] Bindings
-- [ ] Tablet Reference
+- [x] Bindings
+- [x] Tablet Reference
 - [ ] Handler
-- [ ] Daemon
+- [x] Daemon
 
 ## UX
 
-- [ ] Same as OTD's Aux tab
+- [x] Same as OTD's Aux tab
+- [ ] Fix Profiles not being updated directly
