@@ -307,7 +307,6 @@ namespace ClickTap.Lib
             if (ClickTapSettings == null)
                 return Task.FromResult<SerializableSettings>(null!);
 
-            // TODO: Build the serializable settings from bindable (probably)
             var serializedSettings = ClickTapSettings.ToSerializable(IdentifierToPluginConversion);
 
             return Task.FromResult(serializedSettings);

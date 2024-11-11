@@ -68,9 +68,6 @@ namespace ClickTap.Lib.Entities.Bindable
         ///   Constructs the bindings for this profile using a set builder.
         /// </summary>
         /// <param name="tablet">The Tablet owning these bindings.</param>
-        /// <remarks>
-        ///   TODO: Apply abstraction to bindings so that we use inherited classes or builders Instead of <see cref="BindingBuilder"/>.
-        /// </remarks>
         public abstract void ConstructBindings(SharedTabletReference? tablet = null);
 
         public abstract void SetTablet(SharedTabletReference tablet);
@@ -131,14 +128,7 @@ namespace ClickTap.Lib.Entities.Bindable
         public static SerializableProfile ToSerializable<TProfile>(TProfile profile, Dictionary<int, TypeInfo> identifierToPlugin)
             where TProfile : BindableProfile<TState, Tthreshold>
         {
-            var result = new SerializableProfile();
-            {
-                result.Name = profile.Name;
-            }
-
-            // TODO:
-
-            return result;
+            return profile.ToSerializable(identifierToPlugin);
         }
         
         #endregion

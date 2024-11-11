@@ -123,8 +123,6 @@ namespace ClickTap.UX.ViewModels.Bindings
                 // Start building a new tablet overview && build the gesture binsing displays
                 TabletProfileOverview overview = new(tablet, profile);
 
-                // TODO: Create a binding display for each binding types
-
                 Tablets.Add(overview);
             }
 
