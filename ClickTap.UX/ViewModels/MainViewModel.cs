@@ -44,6 +44,7 @@ public partial class MainViewModel : NavigableViewModel
     public MainViewModel()
     {
         BindingsOverviewViewModel = new();
+        BindingsOverviewViewModel.SaveRequested += OnSaveRequested;
         BindingsOverviewViewModel.ProfileChanged += OnProfileChanged;
 
         _client = new("ClickTapDaemon");
@@ -241,6 +242,11 @@ public partial class MainViewModel : NavigableViewModel
             NextViewModel = BindingsOverviewViewModel;
 
         SettingsChanged?.Invoke(this, e);
+    }
+
+    private void OnSaveRequested(object? sender, EventArgs e)
+    {
+        _ = SaveSettingsAsync();
     }
 
     private void OnProfileChanged(object? sender, SerializableProfile e)
