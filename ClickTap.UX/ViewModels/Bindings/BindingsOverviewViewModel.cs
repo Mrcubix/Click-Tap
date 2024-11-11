@@ -55,7 +55,7 @@ namespace ClickTap.UX.ViewModels.Bindings
         }
 
         public BindingsOverviewViewModel(SerializableSettings settings) : this()
-            => SetSettings(settings);
+            => Settings = settings;
 
         #endregion
 
@@ -63,11 +63,22 @@ namespace ClickTap.UX.ViewModels.Bindings
 
         private event EventHandler? TabletChanged;
         public event EventHandler<EventArgs>? SaveRequested;
-        public event EventHandler<SerializableProfile>? ProfileChanged;
+        public event EventHandler<EventArgs>? ApplyRequested;
 
         #endregion
 
         #region Properties
+
+        public SerializableSettings Settings 
+        { 
+            get => _settings;
+            set
+            {
+                // Dispose of previous bindings beforehand
+                DisposeCurrentContext();
+                _settings = value;
+            }
+        }
 
         public int SelectedTabletIndex
         {
@@ -93,18 +104,6 @@ namespace ClickTap.UX.ViewModels.Bindings
         #endregion
 
         #region Methods
-
-        /// <summary>
-        ///   Set the settings of the view model.
-        /// </summary>
-        /// <param name="settings">The settings to set.</param>
-        public void SetSettings(SerializableSettings settings)
-        {
-            // Dispose of previous bindings beforehand
-            DisposeCurrentContext();
-
-            _settings = settings;
-        }
 
         /// <summary>
         ///   Set the tablets of the view model.
@@ -156,7 +155,11 @@ namespace ClickTap.UX.ViewModels.Bindings
         [RelayCommand(CanExecute = nameof(IsReady))]
         public void RequestSave() => SaveRequested?.Invoke(this, EventArgs.Empty);
 
-        protected override void GoBack() => throw new InvalidOperationException();
+        /// <summary>
+        ///   Request the settings to be applied.
+        /// </summary>
+        [RelayCommand(CanExecute = nameof(IsReady))]
+        public void RequestApply() => ApplyRequested?.Invoke(this, EventArgs.Empty);
 
         #endregion
 
@@ -195,28 +198,9 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             // TODO: disappointed, i shouldn't have to do that, look into rewriting the settings builder to modify the profile directly instead of having to update like this
             auxiliarySettingsViewModel.UpdateProfile(SelectedTablet.Profile);
-
-            ProfileChanged?.Invoke(this, SelectedTablet.Profile);
         }
-
-        //private void OnGestureCollectionChanged(object? sender, EventArgs e)
-        //    => Dispatcher.UIThread.InvokeAsync(() => OnSearchTextChanged(SearchText));
 
         #endregion
-
-        #endregion
-
-        #region Static Methods
-
-        private static bool GestureNameStartsWith(StateBindingDisplayViewModel gestureTileViewModel, string text)
-        {
-            return gestureTileViewModel.Description?.StartsWith(text, StringComparison.CurrentCultureIgnoreCase) ?? false;
-        }
-
-        private static bool GestureNameContains(StateBindingDisplayViewModel gestureTileViewModel, string text)
-        {
-            return gestureTileViewModel.Description?.Contains(text, StringComparison.CurrentCultureIgnoreCase) ?? false;
-        }
 
         #endregion
 
@@ -241,7 +225,7 @@ namespace ClickTap.UX.ViewModels.Bindings
             DisposeCurrentContext();
 
             SaveRequested = null;
-            ProfileChanged = null;
+            ApplyRequested = null;
 
             GC.SuppressFinalize(this);
         }

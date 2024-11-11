@@ -50,6 +50,7 @@ namespace ClickTap.UX.ViewModels.Bindings
                 profile.PenButtons[i] ??= settings;
 
                 var bindingDisplay = SetupNewBindingDisplay(settings);
+                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
                 bindingDisplay.Description = GetDescriptionForIndex(i);
 
                 Bindings.Add(bindingDisplay);
@@ -63,11 +64,13 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             // Tip
             TipBindingDisplay = (ThresholdBindingDisplayViewModel)SetupNewBindingDisplay(tipSettings);
+            TipBindingDisplay.Content = GetFriendlyContentFromProperty(tipSettings, plugins);
             TipBindingDisplay.Description = "Tip Binding";
             TipBindingDisplay.ThresholdDescription = "Tip Threshold";
 
             // Eraser
             EraserBindingDisplay = (ThresholdBindingDisplayViewModel)SetupNewBindingDisplay(eraserSettings);
+            EraserBindingDisplay.Content = GetFriendlyContentFromProperty(eraserSettings, plugins);
             EraserBindingDisplay.Description = "Eraser Binding";
             EraserBindingDisplay.ThresholdDescription = "Eraser Threshold";
 

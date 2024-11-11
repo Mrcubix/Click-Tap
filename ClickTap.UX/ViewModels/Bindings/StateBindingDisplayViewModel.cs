@@ -43,6 +43,8 @@ public partial class StateBindingDisplayViewModel : BindingDisplayViewModel, IDi
 
     #region Event Handlers
 
+    protected void OnBindingChanged(object? sender, BindingsChangedArgs e) => BindingChanged?.Invoke(this, e);
+
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(PluginProperty))

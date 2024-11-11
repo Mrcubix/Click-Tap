@@ -45,7 +45,7 @@ public partial class MainViewModel : NavigableViewModel
     {
         BindingsOverviewViewModel = new();
         BindingsOverviewViewModel.SaveRequested += OnSaveRequested;
-        BindingsOverviewViewModel.ProfileChanged += OnProfileChanged;
+        BindingsOverviewViewModel.ApplyRequested += OnApplyRequested;
 
         _client = new("ClickTapDaemon");
 
@@ -161,6 +161,21 @@ public partial class MainViewModel : NavigableViewModel
         }
     }
 
+    private async Task ApplySettingsAsync(SerializableSettings settings)
+    {
+        if (!_client.IsConnected)
+            return;
+
+        try
+        {
+            await _client.Instance.ApplySettings(settings);
+        }
+        catch (Exception e)
+        {
+            HandleException(e);
+        }
+    }
+
     private async Task UpdateProfileAsync(SerializableProfile profile)
     {
         if (!_client.IsConnected)
@@ -236,7 +251,7 @@ public partial class MainViewModel : NavigableViewModel
     {
         bool isOverviewNextViewModel = NextViewModel is BindingsOverviewViewModel;
 
-        BindingsOverviewViewModel.SetSettings(e);
+        BindingsOverviewViewModel.Settings = e;
 
         if (isOverviewNextViewModel)
             NextViewModel = BindingsOverviewViewModel;
@@ -246,12 +261,13 @@ public partial class MainViewModel : NavigableViewModel
 
     private void OnSaveRequested(object? sender, EventArgs e)
     {
+        OnApplyRequested(sender, e);
         _ = SaveSettingsAsync();
     }
 
-    private void OnProfileChanged(object? sender, SerializableProfile e)
+    private void OnApplyRequested(object? sender, EventArgs e)
     {
-        _ = UpdateProfileAsync(e);
+        _ = ApplySettingsAsync(BindingsOverviewViewModel.Settings);
     }
 
     #endregion

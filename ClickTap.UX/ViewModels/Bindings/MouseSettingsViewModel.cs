@@ -49,6 +49,7 @@ namespace ClickTap.UX.ViewModels.Bindings
                 profile.MouseButtons[i] ??= settings;
 
                 var bindingDisplay = SetupNewBindingDisplay(settings);
+                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
                 bindingDisplay.Description = GetDescriptionForIndex(i);
 
                 Bindings.Add(bindingDisplay);
@@ -62,9 +63,11 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             // Scroll Wheel
             MouseScrollUpBindingDisplay = SetupNewBindingDisplay(mouseScrollUpSettings);
+            MouseScrollUpBindingDisplay.Content = GetFriendlyContentFromProperty(mouseScrollUpSettings, plugins);
             MouseScrollUpBindingDisplay.Description = "Scroll Up";
 
             MouseScrollDownBindingDisplay = SetupNewBindingDisplay(mouseScrollDownSettings);
+            MouseScrollDownBindingDisplay.Content = GetFriendlyContentFromProperty(mouseScrollDownSettings, plugins);
             MouseScrollDownBindingDisplay.Description = "Scroll Down";
 
             SubscribeToEvents();

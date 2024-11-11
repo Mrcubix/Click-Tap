@@ -37,7 +37,7 @@ namespace ClickTap.Lib
         protected readonly JsonSerializerSettings _serializerSettings = new()
         {
             Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore,
+            NullValueHandling = NullValueHandling.Include,
             Converters = new List<JsonConverter>
             {
                 new PluginSettingStoreConverter(),
@@ -317,15 +317,16 @@ namespace ClickTap.Lib
         public virtual Task<bool> SaveSettings() => Task.FromResult(SaveSettingsCore());
 
         /// <inheritdoc />
-        public virtual Task<bool> UpdateSettings(SerializableSettings settings)
+        public virtual Task<bool> ApplySettings(SerializableSettings settings)
         {
             Log.Write(PLUGIN_NAME, "Updating settings...");
 
             if (settings == null)
                 return Task.FromResult(false);
 
-            // TODO: Build the settings from serializable
-            ClickTapSettings?.FromSerializable(settings, IdentifierToPluginConversion);
+            foreach (var profile in settings.Profiles)
+                _ = UpdateProfile(profile);
+
             SettingsChanged?.Invoke(this, ClickTapSettings);
 
             return Task.FromResult(true);

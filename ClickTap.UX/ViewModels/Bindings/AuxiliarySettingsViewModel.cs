@@ -60,6 +60,7 @@ namespace ClickTap.UX.ViewModels.Bindings
 
                 var bindingDisplay = SetupNewBindingDisplay(settings);
                 bindingDisplay.Description = GetDescriptionForIndex(i);
+                bindingDisplay.Content = GetFriendlyContentFromProperty(settings, plugins);
 
                 Bindings.Add(bindingDisplay);
             }

@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Entities.Serializable.Bindings;
+using ClickTap.UX.Events;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ClickTap.UX.ViewModels.Bindings;
@@ -38,9 +39,11 @@ public partial class ThresholdBindingDisplayViewModel : StateBindingDisplayViewM
 
     private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // We should avoid sending an update to the daemon too frequently elsewhere
         if (e.PropertyName == nameof(ActivationThreshold))
         {
-            // TODO: Handle this
+            var args = new BindingsChangedArgs(PluginProperty, PluginProperty, this);
+            OnBindingChanged(this, args);
         }
     }
 

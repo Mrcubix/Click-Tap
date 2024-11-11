@@ -36,7 +36,7 @@ namespace ClickTap.Lib.Contracts
         /// <summary>
         ///   Update All settings.
         /// </summary>
-        public Task<bool> UpdateSettings(SerializableSettings settings);
+        public Task<bool> ApplySettings(SerializableSettings settings);
 
         /// <summary>
         ///   Update a specific profile.

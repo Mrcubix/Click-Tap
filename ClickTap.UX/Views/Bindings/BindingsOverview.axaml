@@ -30,7 +30,10 @@
       <Grid>
         <ComboBox ItemsSource="{Binding Tablets}" SelectedIndex="{Binding SelectedTabletIndex}" 
                   IsEnabled="{Binding IsReady}" HorizontalAlignment="Left" />
-        <Button Command="{Binding RequestSave}" Content="Save" IsEnabled="{Binding IsReady}" HorizontalAlignment="Right" />
+        <Grid ColumnDefinitions="Auto, 8, Auto" HorizontalAlignment="Right">
+          <Button Command="{Binding RequestApply}" Content="Apply" IsEnabled="{Binding IsReady}" Grid.Column="0" />
+          <Button Command="{Binding RequestSave}" Content="Save" IsEnabled="{Binding IsReady}" Grid.Column="2" />
+        </Grid>
       </Grid>
     </Border>
   </Grid>
