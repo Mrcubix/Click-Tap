@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using ClickTap.Lib.Bindings;
@@ -9,7 +10,7 @@ using Newtonsoft.Json;
 namespace ClickTap.Lib.Entities.Bindable
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public abstract class BindableProfile<TState, Tthreshold> : ITabletProfile
+    public abstract class BindableProfile<TState, Tthreshold> : ITabletProfile, IEnumerable<Binding?>
         where TState : Binding 
         where Tthreshold : ThresholdBinding
     {
@@ -72,12 +73,37 @@ namespace ClickTap.Lib.Entities.Bindable
         /// </remarks>
         public abstract void ConstructBindings(SharedTabletReference? tablet = null);
 
+        public abstract void SetTablet(SharedTabletReference tablet);
+
         public abstract void Update(SerializableProfile profile, SharedTabletReference tablet, Dictionary<int, TypeInfo> identifierToPlugin);
 
         public abstract void FromSerializable(SerializableProfile profile, Dictionary<int, TypeInfo> identifierToPlugin, 
                                               SharedTabletReference? tablet = null);
 
         public abstract SerializableProfile ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin);
+
+        public virtual IEnumerator<Binding?> GetEnumerator()
+        {
+            yield return Tip;
+            yield return Eraser;
+
+            foreach (var penButton in PenButtons)
+                yield return penButton;
+
+            foreach (var auxButton in AuxButtons)
+                yield return auxButton;
+
+            foreach (var mouseButton in MouseButtons)
+                yield return mouseButton;
+
+            yield return MouseScrollUp;
+            yield return MouseScrollDown;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         #endregion
 

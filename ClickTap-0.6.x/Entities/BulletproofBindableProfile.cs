@@ -28,6 +28,24 @@ namespace ClickTap.Entities
             MouseScrollDown?.Construct();
         }
 
+        public override void SetTablet(SharedTabletReference tablet)
+        {
+            if (tablet is not BulletproofSharedTabletReference btablet)
+                return;
+
+            if (btablet.ServiceProvider.GetService(typeof(TabletReference)) is TabletReference tabletRef)
+            {
+                foreach (var binding in this)
+                {
+                    if (binding is IBulletproofBinding bulletproofBinding)
+                    {
+                        bulletproofBinding.Tablet = tabletRef;
+                        bulletproofBinding.Provider = btablet.ServiceProvider;
+                    }
+                }
+            }
+        }
+
         public override void Update(SerializableProfile profile, SharedTabletReference tablet, Dictionary<int, TypeInfo> identifierToPlugin)
         {
             FromSerializable(profile, identifierToPlugin, tablet, this);
@@ -42,17 +60,13 @@ namespace ClickTap.Entities
 
             Clear();
 
-            var tabletRef = btablet.ServiceProvider.GetService(typeof(TabletReference)) as TabletReference;
-
             Name = profile.Name;
 
             if (profile.Tip != null)
-                Tip = new BulletproofThresholdBinding(profile.Tip.ActivationThreshold, profile.Tip, identifierToPlugin, 
-                                                      tabletRef, btablet.ServiceProvider);
+                Tip = new BulletproofThresholdBinding(profile.Tip.ActivationThreshold, profile.Tip, identifierToPlugin);
 
             if (profile.Eraser != null)
-                Eraser = new BulletproofThresholdBinding(profile.Eraser.ActivationThreshold, profile.Eraser, identifierToPlugin,
-                                                         tabletRef, btablet.ServiceProvider);
+                Eraser = new BulletproofThresholdBinding(profile.Eraser.ActivationThreshold, profile.Eraser, identifierToPlugin);
 
             PenButtons = profile.PenButtons.Select(penButton => penButton != null ? new BulletproofBinding(penButton, identifierToPlugin) : null)
                                            .ToArray();

@@ -215,6 +215,7 @@ namespace ClickTap.Lib
             if (profile == null)
                 return;
 
+            profile.SetTablet(tablet);
             profile.ConstructBindings(tablet);
         }
 
