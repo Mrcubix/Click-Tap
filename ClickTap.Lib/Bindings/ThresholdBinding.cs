@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using ClickTap.Lib.Entities.Serializable.Bindings;
+using Newtonsoft.Json;
 
 namespace ClickTap.Lib.Bindings
 {
@@ -14,6 +15,7 @@ namespace ClickTap.Lib.Bindings
             ActivationThreshold = activationThreshold;
         }
 
+        [JsonProperty]
         public float ActivationThreshold { set; get; }
 
         public virtual void Invoke(float value)
