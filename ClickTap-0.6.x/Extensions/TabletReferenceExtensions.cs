@@ -23,24 +23,24 @@ namespace ClickTap.Extensions
                 MaxY = digitizer.MaxY
             };
 
-            var penSpecifications = new SharedPenSpecifications
+            var penSpecifications = tablet.Properties.Specifications.Pen != null ? new SharedPenSpecifications
             {
                 MaxPressure = tablet.Properties.Specifications.Pen.MaxPressure,
                 Buttons = new SharedButtonSpecifications
                 {
                     ButtonCount = tablet.Properties.Specifications.Pen.Buttons?.ButtonCount ?? 0,
                 }
-            };
+            } : null;
 
-            var auxSpecifications = new SharedButtonSpecifications
+            var auxSpecifications = tablet.Properties.Specifications.AuxiliaryButtons != null ? new SharedButtonSpecifications
             {
                 ButtonCount = tablet.Properties.Specifications.AuxiliaryButtons?.ButtonCount ?? 0
-            };
+            } : null;
 
-            var mouseSpecifications = new SharedButtonSpecifications
+            var mouseSpecifications = tablet.Properties.Specifications.MouseButtons != null ? new SharedButtonSpecifications
             {
                 ButtonCount = tablet.Properties.Specifications.MouseButtons?.ButtonCount ?? 0
-            };
+            } : null;
 
             return new BulletproofSharedTabletReference(tablet.Properties.Name, penDigitizer, touchDigitizer, 
                                                         penSpecifications, auxSpecifications, mouseSpecifications, 

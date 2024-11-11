@@ -324,7 +324,7 @@ namespace ClickTap.Lib
                 return Task.FromResult(false);
 
             // TODO: Build the settings from serializable
-            //TouchGestureSettings = Settings.FromSerializable(settings, IdentifierToPluginConversion);
+            ClickTapSettings?.FromSerializable(settings, IdentifierToPluginConversion);
             SettingsChanged?.Invoke(this, ClickTapSettings);
 
             return Task.FromResult(true);

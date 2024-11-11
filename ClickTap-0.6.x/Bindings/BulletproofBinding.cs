@@ -15,8 +15,13 @@ namespace ClickTap.Bindings
     {
         public BulletproofBinding() { }
 
-        public BulletproofBinding(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin) 
-            : base(binding, identifierToPlugin) { }
+        public BulletproofBinding(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin,
+                                  TabletReference? tablet = null, IServiceManager? provider = null)
+            : base(binding, identifierToPlugin) 
+        { 
+            Tablet = tablet;
+            Provider = provider;
+        }
 
         public IServiceManager? Provider { get; set; }
         public TabletReference? Tablet { get; set; }

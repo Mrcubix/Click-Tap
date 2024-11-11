@@ -59,6 +59,8 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     public void Initialize()
     {
+        FetchOutputMode();
+
         // Filters are loaded before tools for some reasons, so we have to wait for the daemon to be loaded
         _daemon = (ClickTapDaemon?)BulletproofClickTapDaemonBase.Instance;
 
@@ -109,6 +111,20 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
             if (pointer is IMouseButtonHandler mouseButtonHandler)
                 btablet.ServiceProvider.AddService(() => mouseButtonHandler);
+
+            btablet.ServiceProvider.AddService(() => Tablet!);
+        }
+    }
+
+    protected void FetchOutputMode()
+    {
+        if (_Driver is Driver driver && Tablet != null)
+        {
+            // fetch the device first
+            var device = driver.InputDevices.Where(x => x.Properties.Name == Tablet.Properties.Name).FirstOrDefault();
+
+            // then fetch the output mode
+            _outputMode = device?.OutputMode;
         }
     }
 
@@ -158,35 +174,35 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
     }
 
     private void HandleTabletReport(TabletReference tablet, PenSpecifications pen, ITabletReport report)
-        {
-            float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
-            if (report is IEraserReport eraserReport && eraserReport.Eraser)
-                _profile?.Eraser?.Invoke(pressurePercent);
-            else
-                _profile?.Tip?.Invoke(pressurePercent);
+    {
+        float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
+        if (report is IEraserReport eraserReport && eraserReport.Eraser)
+            _profile?.Eraser?.Invoke(pressurePercent);
+        else
+            _profile?.Tip?.Invoke(pressurePercent);
 
-            HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
-        }
+        HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
+    }
 
-        private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)
-        {
-            HandleBindingCollection(tablet, report, _profile!.AuxButtons, report.AuxButtons);
-        }
+    private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)
+    {
+        HandleBindingCollection(tablet, report, _profile!.AuxButtons, report.AuxButtons);
+    }
 
-        private void HandleMouseReport(TabletReference tablet, IMouseReport report)
-        {
-            HandleBindingCollection(tablet, report, _profile!.MouseButtons, report.MouseButtons);
+    private void HandleMouseReport(TabletReference tablet, IMouseReport report)
+    {
+        HandleBindingCollection(tablet, report, _profile!.MouseButtons, report.MouseButtons);
 
-            _profile?.MouseScrollDown?.Invoke(report.Scroll.Y < 0);
-            _profile?.MouseScrollUp?.Invoke(report.Scroll.Y > 0);
-        }
+        _profile?.MouseScrollDown?.Invoke(report.Scroll.Y < 0);
+        _profile?.MouseScrollUp?.Invoke(report.Scroll.Y > 0);
+    }
 
-        private static void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
-        {
-            for (int i = 0; i < newStates.Count; i++)
-                if (bindings[i] != null)
-                    bindings[i]!.Invoke(newStates[i]);
-        }
+    private static void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
+    {
+        for (int i = 0; i < newStates.Count; i++)
+            if (bindings[i] != null)
+                bindings[i]!.Invoke(newStates[i]);
+    }
 
     #endregion
 

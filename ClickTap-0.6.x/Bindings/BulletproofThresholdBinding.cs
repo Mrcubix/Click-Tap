@@ -15,8 +15,13 @@ namespace ClickTap.Bindings
     {
         public BulletproofThresholdBinding() { }
 
-        public BulletproofThresholdBinding(float activationThreshold, SerializableThresholdBinding serializableThresholdBinding, Dictionary<int, TypeInfo> identifierToPlugin)
-            : base(activationThreshold, serializableThresholdBinding, identifierToPlugin) { }
+        public BulletproofThresholdBinding(float activationThreshold, SerializableThresholdBinding serializableThresholdBinding, 
+                                           Dictionary<int, TypeInfo> identifierToPlugin, TabletReference? tablet = null, IServiceManager? provider = null)
+            : base(activationThreshold, serializableThresholdBinding, identifierToPlugin) 
+        {
+            Tablet = tablet;
+            Provider = provider;
+        }
 
         public IServiceManager? Provider { get; set; }
         public TabletReference? Tablet { get; set; }
@@ -59,7 +64,7 @@ namespace ClickTap.Bindings
             ActivationThreshold = serializableThresholdBinding.ActivationThreshold;
 
             // The plugin might not be installed anymore or isn't loaded 
-            if (identifierToPlugin.TryGetValue(binding.Identifier, out var typeInfo))
+            if (identifierToPlugin.TryGetValue(binding.Identifier, out var typeInfo) == false)
                 return;
 
             var store = new PluginSettingStore(typeInfo);

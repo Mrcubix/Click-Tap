@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ClickTap.UX.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ClickTap.UX.Views.ConnectionView"
+             x:DataType="vm:ConnectionViewModel">
+
+  <Design.DataContext>
+    <vm:ConnectionViewModel />
+  </Design.DataContext>
+
+  <Grid Grid.RowDefinitions="Auto, Auto" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Text="{Binding ConnectionStateText}" FontSize="16" FontWeight="Bold" Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+    <TextBlock Text="A friendly reminder that this is an early version of Click &amp; Tap, things will probably break." FontSize="10" 
+               Grid.Row="1" HorizontalAlignment="Center"/>
+  </Grid>
+
+</UserControl>

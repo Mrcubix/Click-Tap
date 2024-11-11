@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ClickTap.Lib\ClickTap.Lib.csproj" />
+    <ProjectReference Include="../ClickTap.Lib/ClickTap.Lib.csproj" />
+    <ProjectReference Include="../.modules/OpenTabletDriver.External/OpenTabletDriver.External.Avalonia/OpenTabletDriver.External.Avalonia.csproj" />
   </ItemGroup>
 </Project>

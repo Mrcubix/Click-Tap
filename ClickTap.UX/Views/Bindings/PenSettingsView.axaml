@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ClickTap.UX.ViewModels.Bindings"
+             xmlns:containers="clr-namespace:ClickTap.UX.Controls.Containers"
+             xmlns:otdextcontrols="clr-namespace:OpenTabletDriver.External.Avalonia.Controls;assembly=OpenTabletDriver.External.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ClickTap.UX.Views.Bindings.PenSettingsView"
+             x:DataType="vm:PenSettingsViewModel">
+
+  <Design.DataContext>
+    <vm:PenSettingsViewModel />
+  </Design.DataContext>
+
+  <UserControl.Styles>
+    <Style Selector="#VIEW_Body > ContentPresenter">
+      <Setter Property="Margin" Value="0, 0, 0, 16" />
+    </Style>
+    <Style Selector="#VIEW_Body > ContentPresenter:nth-last-child(1)">
+      <Setter Property="Margin" Value="0, 0, 0, 0" />
+    </Style>
+
+    <Style Selector="#VIEW_Root > Grid > otdextcontrols|BindingDisplay">
+      <Setter Property="Margin" Value="0, 0, 0, 16" />
+    </Style>
+    <Style Selector="#VIEW_Root > Grid > otdextcontrols|BindingDisplay:nth-last-child(1)">
+      <Setter Property="Margin" Value="0, 0, 0, 0" />
+    </Style>
+
+    <Style Selector="Border.Section">
+      <Setter Property="BorderBrush" Value="{StaticResource BorderColorBrush}" />
+      <Setter Property="Background" Value="{StaticResource AccentColorBrush}" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="5" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid Name="VIEW_Root" RowDefinitions="Auto, Auto, Auto" Margin="0, 12">
+
+    <!-- Pen Tip & Eraser -->
+    <Grid ColumnDefinitions="*, 16, *">
+
+      <Grid RowDefinitions="Auto, Auto" Grid.Column="0" Margin="0, 12">
+        <TextBlock Text="Tip Settings" FontSize="16" FontWeight="Bold" Grid.Row="0" Margin="16,0,0,8" />
+        <Border Classes="Section" Grid.Row="1">
+          <containers:ThresholdBindingDisplay DataContext="{Binding TipBindingDisplay}" Margin="16"/>
+        </Border>
+      </Grid>
+
+      <Grid RowDefinitions="Auto, Auto" Grid.Column="2" Margin="0, 12">
+        <TextBlock Text="Eraser Settings" FontSize="16" FontWeight="Bold" Grid.Row="0" Margin="16,0,0,8" />
+        <Border Classes="Section" Grid.Row="1">
+          <containers:ThresholdBindingDisplay DataContext="{Binding EraserBindingDisplay}" Margin="16" />
+        </Border>
+      </Grid>
+
+    </Grid>
+
+    <!-- Pen Buttons -->
+    <TextBlock Name="VIEW_Header" Text="{Binding Header}" FontSize="16" FontWeight="Bold" Grid.Row="1" Margin="16,0,0,8" />
+
+    <Border Classes="Section" Grid.Row="2">
+      <ItemsControl Name="VIEW_Body" ItemsSource="{Binding Bindings}" Margin="16">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <otdextcontrols:BindingDisplay />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+  </Grid>
+
+</UserControl>

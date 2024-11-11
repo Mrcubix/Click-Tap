@@ -4,6 +4,7 @@ using ClickTap.Lib.Entities.Bindable;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.Lib.Tablet;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace ClickTap.Entities
 {
@@ -36,13 +37,22 @@ namespace ClickTap.Entities
         public override void FromSerializable(SerializableProfile profile, Dictionary<int, TypeInfo> identifierToPlugin, 
                                               SharedTabletReference? tablet = null)
         {
+            if (tablet is not BulletproofSharedTabletReference btablet)
+                return;
+
+            Clear();
+
+            var tabletRef = btablet.ServiceProvider.GetService(typeof(TabletReference)) as TabletReference;
+
             Name = profile.Name;
 
             if (profile.Tip != null)
-                Tip = new BulletproofThresholdBinding(profile.Tip.ActivationThreshold, profile.Tip, identifierToPlugin);
+                Tip = new BulletproofThresholdBinding(profile.Tip.ActivationThreshold, profile.Tip, identifierToPlugin, 
+                                                      tabletRef, btablet.ServiceProvider);
 
             if (profile.Eraser != null)
-                Eraser = new BulletproofThresholdBinding(profile.Eraser.ActivationThreshold, profile.Eraser, identifierToPlugin);
+                Eraser = new BulletproofThresholdBinding(profile.Eraser.ActivationThreshold, profile.Eraser, identifierToPlugin,
+                                                         tabletRef, btablet.ServiceProvider);
 
             PenButtons = profile.PenButtons.Select(penButton => penButton != null ? new BulletproofBinding(penButton, identifierToPlugin) : null)
                                            .ToArray();
@@ -58,6 +68,8 @@ namespace ClickTap.Entities
 
             if (profile.MouseScrollDown != null)
                 MouseScrollDown = new BulletproofBinding(profile.MouseScrollDown, identifierToPlugin);
+
+            ConstructBindings(tablet);
         }
 
         public override SerializableProfile ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)

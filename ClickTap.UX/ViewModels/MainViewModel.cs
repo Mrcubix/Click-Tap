@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Threading;
 using ClickTap.Lib.Contracts;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Tablet;
+using ClickTap.UX.ViewModels.Bindings;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenTabletDriver.External.Common.RPC;
 using OpenTabletDriver.External.Common.Serializables;
@@ -23,18 +25,17 @@ public partial class MainViewModel : NavigableViewModel
     private RpcClient<IClickTapDaemon> _client;
     private SerializableSettings? _settings;
 
+    private readonly ConnectionViewModel<IClickTapDaemon> _connectionScreenViewModel;
+
     #endregion
 
     #region Observable Fields
 
     [ObservableProperty]
-    private ObservableCollection<SerializablePlugin> _plugins = new();
-
-    [ObservableProperty]
-    private string _connectionStateText = "Not connected";
-
-    [ObservableProperty]
     private bool _isReady = false;
+
+    [ObservableProperty]
+    private BindingsOverviewViewModel _bindingsOverviewViewModel;
 
     #endregion
 
@@ -42,7 +43,14 @@ public partial class MainViewModel : NavigableViewModel
 
     public MainViewModel()
     {
+        BindingsOverviewViewModel = new();
+        BindingsOverviewViewModel.ProfileChanged += OnProfileChanged;
+
         _client = new("ClickTapDaemon");
+
+        _connectionScreenViewModel = new(_client);
+
+        NextViewModel = _connectionScreenViewModel;
 
         InitializeClient();
     }
@@ -51,8 +59,6 @@ public partial class MainViewModel : NavigableViewModel
     {
         //_client.Converters.AddRange(Converters);
 
-        _client.Connected += OnClientConnected;
-        _client.Connecting += OnClientConnecting;
         _client.Disconnected += OnClientDisconnected;
         _client.Attached += (sender, args) => Task.Run(() => OnClientAttached(sender, args));
 
@@ -63,13 +69,9 @@ public partial class MainViewModel : NavigableViewModel
 
     #region Events
 
-    public event EventHandler<ObservableCollection<SerializablePlugin>>? PluginChanged;
-
     public event EventHandler<SerializableSettings>? SettingsChanged;
 
     public event EventHandler? Ready;
-
-    public event EventHandler? Disconnected;
 
     #endregion
 
@@ -181,40 +183,23 @@ public partial class MainViewModel : NavigableViewModel
     // Plugin Client Event Handlers
     //
 
-    private void OnClientConnected(object? sender, EventArgs e)
-    {
-        ConnectionStateText = "Connected";
-    }
-
-    private void OnClientConnecting(object? sender, EventArgs e)
-    {
-        ConnectionStateText = "Connecting...";
-    }
-
     private void OnClientDisconnected(object? sender, EventArgs e)
     {
-        ConnectionStateText = "Disconnected";
         IsReady = false;
-        Disconnected?.Invoke(this, EventArgs.Empty);
         _client.Instance.TabletsChanged -= OnTabletsChanged;
 
-        _ = Task.Run(() => AttemptReconnectionIndefinitelyAsync());
-        NextViewModel = this;
+        _ = Task.Run(AttemptReconnectionIndefinitelyAsync);
+        NextViewModel = _connectionScreenViewModel;
     }
 
     private async Task OnClientAttached(object? sender, EventArgs e)
     {
-        ConnectionStateText = "Connected, Fetching Plugins & Settings ...";
-
         _client.Instance.TabletsChanged += OnTabletsChanged;
 
         var tempPlugins = await FetchPluginsAsync();
 
         if (tempPlugins != null)
-        {
-            Plugins = new ObservableCollection<SerializablePlugin>(tempPlugins);
-            PluginChanged?.Invoke(this, Plugins);
-        }
+            BindingsOverviewViewModel.Plugins = new ObservableCollection<SerializablePlugin>(tempPlugins);
 
         var tablets = await _client.Instance.GetTablets();
 
@@ -223,7 +208,7 @@ public partial class MainViewModel : NavigableViewModel
 
         IsReady = true;
         Ready?.Invoke(this, EventArgs.Empty);
-        //NextViewModel = BindingsOverviewViewModel;
+        NextViewModel = BindingsOverviewViewModel;
     }
 
     public void OnTabletsChanged(object? sender, IEnumerable<SharedTabletReference> tablets)
@@ -242,20 +227,25 @@ public partial class MainViewModel : NavigableViewModel
         {
             _settings = tempSettings;
             Dispatcher.UIThread.Post(() => OnSettingsChanged(_settings));
-            //Dispatcher.UIThread.Post(() => BindingsOverviewViewModel.SetTablets(tablets));
+            Dispatcher.UIThread.Post(() => BindingsOverviewViewModel.SetTablets(tablets));
         }
     }
 
     private void OnSettingsChanged(SerializableSettings e)
     {
-        //bool isOverviewNextViewModel = NextViewModel is BindingsOverviewViewModel;
+        bool isOverviewNextViewModel = NextViewModel is BindingsOverviewViewModel;
 
-        //BindingsOverviewViewModel.SetSettings(e);
+        BindingsOverviewViewModel.SetSettings(e);
 
-        //if (isOverviewNextViewModel)
-        //    NextViewModel = BindingsOverviewViewModel;
+        if (isOverviewNextViewModel)
+            NextViewModel = BindingsOverviewViewModel;
 
         SettingsChanged?.Invoke(this, e);
+    }
+
+    private void OnProfileChanged(object? sender, SerializableProfile e)
+    {
+        _ = UpdateProfileAsync(e);
     }
 
     #endregion
@@ -269,9 +259,9 @@ public partial class MainViewModel : NavigableViewModel
             case RemoteRpcException re:
                 Console.WriteLine($"An Error occured while attempting to connect to the RPC server: {re.Message}");
                 Console.WriteLine("----------------------------------------");
-                Console.WriteLine("This error could have occured due to an different version of WheelAddon being used with this Interface.");
+                Console.WriteLine("This error could have occured due to an different version of Click & Tap being used with this Interface.");
 
-                ConnectionStateText = "Disconnected";
+                _connectionScreenViewModel.OnClientDisconnected(_client, EventArgs.Empty);
                 break;
             case OperationCanceledException _:
                 break;

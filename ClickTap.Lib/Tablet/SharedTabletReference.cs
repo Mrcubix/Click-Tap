@@ -11,8 +11,8 @@ namespace ClickTap.Lib.Tablet
         }
 
         public SharedTabletReference(string name, SharedTabletDigitizer digitizer, SharedTabletDigitizer touchDigitizer, 
-                                     SharedPenSpecifications penSpecifications, SharedButtonSpecifications auxButtons,
-                                     SharedButtonSpecifications mouseButtons)
+                                     SharedPenSpecifications? penSpecifications, SharedButtonSpecifications? auxButtons,
+                                     SharedButtonSpecifications? mouseButtons)
         {
             Name = name;
             PenDigitizer = digitizer;
@@ -23,8 +23,8 @@ namespace ClickTap.Lib.Tablet
         }
 
         public SharedTabletReference(string name, SharedTabletDigitizer digitizer, SharedTabletDigitizer touchDigitizer, 
-                                     SharedPenSpecifications penSpecifications, SharedButtonSpecifications auxButtons,
-                                     SharedButtonSpecifications mouseButtons, SharedDeviceIdentifier deviceIdentifier)
+                                     SharedPenSpecifications? penSpecifications, SharedButtonSpecifications? auxButtons,
+                                     SharedButtonSpecifications? mouseButtons, SharedDeviceIdentifier deviceIdentifier)
         {
             Name = name;
             PenDigitizer = digitizer;

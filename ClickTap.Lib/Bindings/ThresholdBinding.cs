@@ -9,7 +9,10 @@ namespace ClickTap.Lib.Bindings
         public ThresholdBinding() { }
 
         public ThresholdBinding(float activationThreshold, SerializableThresholdBinding binding, Dictionary<int, TypeInfo> identifierToPlugin) 
-            : base(binding, identifierToPlugin) { }
+            : base(binding, identifierToPlugin) 
+        { 
+            ActivationThreshold = activationThreshold;
+        }
 
         public float ActivationThreshold { set; get; }
 

@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:ClickTap.UX.Views.Bindings"
+             xmlns:vm="clr-namespace:ClickTap.UX.ViewModels.Bindings"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ClickTap.UX.Views.Bindings.BindingsOverview"
+             x:DataType="vm:BindingsOverviewViewModel">
+
+  <Design.DataContext>
+    <vm:BindingsOverviewViewModel />
+  </Design.DataContext>
+
+  <Grid RowDefinitions="*, Auto">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Padding="32, 0" Grid.Row="0">
+      <Grid RowDefinitions="*, Auto, Auto, Auto, *" Grid.IsSharedSizeScope="True">
+        <!-- Pen Settings (When Available) -->
+        <views:PenSettingsView DataContext="{Binding PenSettings}" Grid.Row="1" IsVisible="{Binding IsEnabled}" />
+
+        <!-- Mouse Settings (When Available) -->
+        <views:MouseSettingsView DataContext="{Binding MouseSettings}" Grid.Row="2" IsVisible="{Binding IsEnabled}" />
+
+        <!-- Auxiliary Settings (When Available) -->
+        <views:AuxiliarySettingsView DataContext="{Binding AuxiliarySettings}" Grid.Row="3" IsVisible="{Binding IsEnabled}" />
+      </Grid>
+    </ScrollViewer>
+
+    <Border Background="{StaticResource AccentColorBrush}" BorderThickness="0,2,0,0" Grid.Row="1" Padding="4">
+      <Grid>
+        <ComboBox ItemsSource="{Binding Tablets}" SelectedIndex="{Binding SelectedTabletIndex}" 
+                  IsEnabled="{Binding IsReady}" HorizontalAlignment="Left" />
+        <Button Command="{Binding RequestSave}" Content="Save" IsEnabled="{Binding IsReady}" HorizontalAlignment="Right" />
+      </Grid>
+    </Border>
+  </Grid>
+
+</UserControl>

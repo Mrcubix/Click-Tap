@@ -11,8 +11,8 @@ namespace ClickTap.Entities
         }
 
         public BulletproofSharedTabletReference(string name, SharedTabletDigitizer digitizer, 
-                                                SharedTabletDigitizer touchDigitizer, SharedPenSpecifications penSpecifications, 
-                                                SharedButtonSpecifications auxButtons, SharedButtonSpecifications mouseButtons,
+                                                SharedTabletDigitizer touchDigitizer, SharedPenSpecifications? penSpecifications, 
+                                                SharedButtonSpecifications? auxButtons, SharedButtonSpecifications? mouseButtons,
                                                 IServiceManager serviceProvider)
             : base(name, digitizer, touchDigitizer, penSpecifications, auxButtons, mouseButtons)
         {
@@ -21,8 +21,8 @@ namespace ClickTap.Entities
 
         public BulletproofSharedTabletReference(string name, SharedTabletDigitizer digitizer, 
                                                 SharedTabletDigitizer touchDigitizer, SharedDeviceIdentifier deviceIdentifier,
-                                                SharedPenSpecifications penSpecifications, SharedButtonSpecifications auxButtons, 
-                                                SharedButtonSpecifications mouseButtons, IServiceManager serviceProvider)
+                                                SharedPenSpecifications? penSpecifications, SharedButtonSpecifications? auxButtons, 
+                                                SharedButtonSpecifications? mouseButtons, IServiceManager serviceProvider)
             : base(name, digitizer, touchDigitizer, penSpecifications, auxButtons, mouseButtons, deviceIdentifier)
         {
             ServiceProvider = serviceProvider;
