@@ -26,6 +26,7 @@
       </Grid>
     </ScrollViewer>
 
+    <!-- Footer bar used for selecting a tablet, applying or saving settings -->
     <Border Background="{StaticResource AccentColorBrush}" BorderThickness="0,2,0,0" Grid.Row="1" Padding="4">
       <Grid>
         <ComboBox ItemsSource="{Binding Tablets}" SelectedIndex="{Binding SelectedTabletIndex}" 

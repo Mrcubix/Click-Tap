@@ -143,6 +143,7 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             IsReady = true;
 
+            // This might not be a good idea, as a tablet could still exist, but may not be the same index
             if (oldSelectedTabletIndex != SelectedTabletIndex)
                 OnTabletChanged(this, EventArgs.Empty);
         }

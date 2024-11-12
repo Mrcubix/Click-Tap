@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Threading;
 using ClickTap.Lib.Contracts;
 using ClickTap.Lib.Entities.Serializable;
@@ -242,6 +241,8 @@ public partial class MainViewModel : NavigableViewModel
         if (tempSettings != null)
         {
             _settings = tempSettings;
+
+            // Always set the settings first
             Dispatcher.UIThread.Post(() => OnSettingsChanged(_settings));
             Dispatcher.UIThread.Post(() => BindingsOverviewViewModel.SetTablets(tablets));
         }

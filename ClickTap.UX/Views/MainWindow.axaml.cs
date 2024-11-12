@@ -92,7 +92,6 @@ public partial class MainWindow : AppMainWindow
             };
 
             // Now we show the dialog
-
             var res = await dialog.ShowDialog<SerializablePluginSettings>(this);
 
             HandleBindingEditorResult(res, e);

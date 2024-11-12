@@ -63,6 +63,7 @@ namespace ClickTap.Bindings
                 value = Store.Settings[0].GetValue<string?>();
             else
             {
+                // 0.6 so smart that you have to check for 45454 properties just to get the valid keys properly
                 var valueProperty = plugin.FindPropertyWithAttribute<PropertyAttribute>();
                 var validatedProperty = plugin.FindPropertyWithAttribute<PropertyValidatedAttribute>();
 
@@ -98,6 +99,7 @@ namespace ClickTap.Bindings
             var store = new PluginSettingStore(typeInfo);
 
             // At first, i only fetched the property with a PropertyValidatedAttribute
+            // 0.6 so smart that you have to check for 45454 properties just to set the key properly
             var valueProperty = typeInfo?.FindPropertyWithAttribute<PropertyAttribute>();
             var validatedProperty = typeInfo?.FindPropertyWithAttribute<PropertyValidatedAttribute>();
 

@@ -11,8 +11,15 @@ namespace ClickTap.Lib.Entities
         [JsonProperty]
         string Name { get; }
 
+        /// <summary>
+        ///   Set all bindings to null.
+        /// </summary>
         public void Clear();
 
+        /// <summary>
+        ///   Matches the tablet specification to the tablet profile.
+        /// </summary>
+        /// <param name="tabletSpecifications">The tablet specification, Crafted by the handler</param>
         public void MatchSpecifications(SharedTabletReference tabletSpecifications);
     }
 }

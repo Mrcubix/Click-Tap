@@ -7,12 +7,21 @@ namespace ClickTap.UX.Models;
 
 public partial class TabletProfileOverview : ObservableObject, IDisposable
 {
+    /// <summary>
+    ///   The name of the tablet running the profile.
+    /// </summary>
     [ObservableProperty]
     private string _name = string.Empty;
 
+    /// <summary>
+    ///   The Tablet's specifications.
+    /// </summary>
     [ObservableProperty]
     private SharedTabletReference _reference = null!;
 
+    /// <summary>
+    ///   The profile containing all the serialized binding settings.
+    /// </summary>
     [ObservableProperty]
     private SerializableProfile _profile = null!;
 

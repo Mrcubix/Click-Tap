@@ -45,6 +45,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         Log.Write(PLUGIN_NAME, "Debugger attached", LogLevel.Debug);
 #endif
 
+        // Tools are loaded last, so we need to wait for the daemon to be loaded
         ClickTapDaemon.DaemonLoaded += OnDaemonLoaded;
         _awaitingDaemon = true;
     }
@@ -111,9 +112,11 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
                 _ => null
             };
 
+            // Some Bindings require a pointer to be passed to mouse events
             if (pointer is IMouseButtonHandler mouseButtonHandler)
                 btablet.ServiceProvider.AddService(() => mouseButtonHandler);
 
+            // Some Bindings may require the tablet when constructed for some reasons
             btablet.ServiceProvider.AddService(() => Tablet!);
         }
     }
@@ -186,6 +189,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
         ThresholdBinding? binding;
 
+        // TODO: This looks bad, a rewrite is in order
         if (pressurePercent == 0f && _awaitingRelease)
             _awaitingRelease = false;
 
@@ -220,7 +224,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         for (int i = 0; i < newStates.Count; i++)
             if (bindings[i] != null && newStates[i])
                 _bindings.Add(bindings[i]);
-            else
+            else // TODO: i shouldn't have to do this, but i need to figure out how to do it without
             {
                 bindings[i]?.Invoke(false);
                 _bindings.Remove(bindings[i]);

@@ -77,6 +77,9 @@ namespace ClickTap.Lib.Tablet
         [JsonProperty]
         public SharedButtonSpecifications? MouseButtons { get; set; } = null;
 
-        public Vector2 Size => new(PenDigitizer!.Width, PenDigitizer!.Height);
+        /// <summary>
+        ///   Get the size of the tablet in mm.
+        /// </summary>
+        public Vector2 Size => new(PenDigitizer?.Width ?? TouchDigitizer?.Width ?? 0, PenDigitizer?.Height ?? TouchDigitizer?.Height ?? 0);
     }
 }

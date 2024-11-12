@@ -39,6 +39,7 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             var profile = overview.Profile;
 
+            // Avoid some double invokation shenanigans
             UnsubscribeFromEvents();   
             Bindings.Clear();
 
@@ -76,6 +77,7 @@ namespace ClickTap.UX.ViewModels.Bindings
             IsEnabled = true;
         }
 
+        // TODO: Get rid of this
         public override void UpdateProfile(SerializableProfile profile)
         {
             profile.PenButtons = Bindings.Select(binding => (SerializableBinding?)binding.PluginProperty).ToArray();

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using ClickTap.Lib.Entities.Serializable;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.UX.Events;
 using ClickTap.UX.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -48,6 +47,7 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             var profile = overview.Profile;
 
+            // Avoid some double invokation shenanigans
             UnsubscribeFromEvents();
             Bindings.Clear();
 
@@ -74,6 +74,7 @@ namespace ClickTap.UX.ViewModels.Bindings
             return $"{Prefix} {index + 1}";
         }
 
+        // TODO: Get rid of this
         public virtual void UpdateProfile(SerializableProfile profile)
         {
             profile.AuxButtons = Bindings.Select(binding => (SerializableBinding?)binding.PluginProperty).ToArray();
