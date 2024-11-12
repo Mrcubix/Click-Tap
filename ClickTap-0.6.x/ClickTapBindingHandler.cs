@@ -25,12 +25,14 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     #region Fields
 
+    private List<Binding?> _bindings = new();
     private IOutputMode? _outputMode;
     private ClickTapDaemon? _daemon;
     private BulletproofBindableProfile _profile = null!;
     private BulletproofSharedTabletReference? _tablet;
     private bool _awaitingDaemon;
     private bool _initialized;
+    private bool _awaitingRelease;
 
     #endregion
 
@@ -167,8 +169,6 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
         if (report is IAuxReport auxReport)
             HandleAuxiliaryReport(Tablet, auxReport);
-        if (report is IMouseReport mouseReport)
-            HandleMouseReport(Tablet, mouseReport);
         if (report is ITabletReport tabletReport)
             HandleTabletReport(Tablet, Tablet.Properties.Specifications.Pen, tabletReport);
     }
@@ -178,11 +178,36 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         // We handle pen buttons first, as the Tip and Eraser need to be handled separately from them
         HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
 
+        HandleTips(tablet, pen, report);
+    }
+
+    private void HandleTips(TabletReference tablet, PenSpecifications pen, ITabletReport report)
+    {
         float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
+        ThresholdBinding? binding;
+
+        if (pressurePercent == 0f && _awaitingRelease)
+            _awaitingRelease = false;
+
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
-            _profile?.Eraser?.Invoke(pressurePercent);
+            binding = _profile?.Eraser;
         else
-            _profile?.Tip?.Invoke(pressurePercent);
+            binding = _profile?.Tip;
+
+        if (binding != null && _bindings.Count > 0 &&
+            pressurePercent > binding.ActivationThreshold)
+        {
+            _awaitingRelease = true;
+
+            // Disable the tip or eraser
+            binding.Invoke(false);
+
+            // Enable the bindings instead
+            foreach (var b in _bindings)
+                b?.Invoke(true);
+        }
+        else if (!_awaitingRelease) // No bindings are active, invoke the binding
+            binding?.Invoke(pressurePercent);
     }
 
     private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)
@@ -190,19 +215,16 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         HandleBindingCollection(tablet, report, _profile!.AuxButtons, report.AuxButtons);
     }
 
-    private void HandleMouseReport(TabletReference tablet, IMouseReport report)
-    {
-        HandleBindingCollection(tablet, report, _profile!.MouseButtons, report.MouseButtons);
-
-        _profile?.MouseScrollDown?.Invoke(report.Scroll.Y < 0);
-        _profile?.MouseScrollUp?.Invoke(report.Scroll.Y > 0);
-    }
-
-    private static void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
+    private void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
     {
         for (int i = 0; i < newStates.Count; i++)
-            if (bindings[i] != null)
-                bindings[i]!.Invoke(newStates[i]);
+            if (bindings[i] != null && newStates[i])
+                _bindings.Add(bindings[i]);
+            else
+            {
+                bindings[i]?.Invoke(false);
+                _bindings.Remove(bindings[i]);
+            }
     }
 
     #endregion
