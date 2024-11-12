@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using ClickTap.UX.ViewModels;
 
+#pragma warning disable IL2057
+
 namespace ClickTap.UX;
 
 public class ViewLocator : IDataTemplate
