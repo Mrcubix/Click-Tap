@@ -222,7 +222,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
     private void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
     {
         for (int i = 0; i < newStates.Count; i++)
-            if (bindings[i] != null && newStates[i])
+            if (bindings[i] != null && newStates[i] && bindings[i]!.State == false)
                 _bindings.Add(bindings[i]);
             else // TODO: i shouldn't have to do this, but i need to figure out how to do it without
             {
