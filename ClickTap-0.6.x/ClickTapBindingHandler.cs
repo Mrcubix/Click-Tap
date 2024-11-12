@@ -181,22 +181,15 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         // We handle pen buttons first, as the Tip and Eraser need to be handled separately from them
         HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
 
-        HandleTips(tablet, pen, report);
+        HandleTips(pen, report);
     }
 
-    private void HandleTips(TabletReference tablet, PenSpecifications pen, ITabletReport report)
+    private void HandleTips(PenSpecifications pen, ITabletReport report)
     {
         float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
         ThresholdBinding? binding;
 
-        // TODO: This looks bad, a rewrite is in order
-        if (pressurePercent == 0f && _awaitingRelease)
-        {
-            _awaitingRelease = false;
-
-            foreach (var b in _bindings)
-                b?.Invoke(false);
-        }
+        ResetTipState(pressurePercent);
 
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
             binding = _profile?.Eraser;
@@ -206,18 +199,33 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         // It could potentially be an issue if the eraser or tip is unbound
         if (binding != null && _bindings.Count > 0 &&
             pressurePercent > binding.ActivationThreshold)
-        {
-            _awaitingRelease = true;
-
-            // Disable the tip or eraser
-            binding.Invoke(false);
-
-            // Enable the bindings instead
-            foreach (var b in _bindings)
-                b?.Invoke(true);
-        }
+            HandleClickTap(binding);
         else if (!_awaitingRelease) // No bindings are active, invoke the binding
             binding?.Invoke(pressurePercent);
+    }
+
+    private void HandleClickTap(ThresholdBinding binding)
+    {
+        _awaitingRelease = true;
+
+        // Disable the tip or eraser
+        binding.Invoke(false);
+
+        // Enable the bindings instead
+        foreach (var b in _bindings)
+            b?.Invoke(true);
+    }
+
+    // TODO: This looks bad, a rewrite is in order
+    private void ResetTipState(float pressurePercent)
+    {
+        if (pressurePercent == 0f && _awaitingRelease)
+        {
+            _awaitingRelease = false;
+
+            foreach (var b in _bindings)
+                b?.Invoke(false);
+        }
     }
 
     private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)
@@ -231,10 +239,13 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             if (bindings[i] != null && newStates[i] && bindings[i]!.State == false)
                 _bindings.Add(bindings[i]);
             else // TODO: i shouldn't have to do this, but i need to figure out how to do it without
-            {
-                bindings[i]?.Invoke(false);
-                _bindings.Remove(bindings[i]);
-            }
+                ResetCollectionBinding(bindings[i]);
+    }
+
+    private void ResetCollectionBinding(Binding? binding)
+    {
+        binding?.Invoke(false);
+        _bindings.Remove(binding);
     }
 
     #endregion
