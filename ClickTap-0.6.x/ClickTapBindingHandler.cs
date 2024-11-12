@@ -191,13 +191,19 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
         // TODO: This looks bad, a rewrite is in order
         if (pressurePercent == 0f && _awaitingRelease)
+        {
             _awaitingRelease = false;
+
+            foreach (var b in _bindings)
+                b?.Invoke(false);
+        }
 
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
             binding = _profile?.Eraser;
         else
             binding = _profile?.Tip;
 
+        // It could potentially be an issue if the eraser or tip is unbound
         if (binding != null && _bindings.Count > 0 &&
             pressurePercent > binding.ActivationThreshold)
         {
