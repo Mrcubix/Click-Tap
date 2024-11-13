@@ -51,6 +51,7 @@ If you want to rollback to the settings you had before applying, you may just re
 If you plan on using `Scroll Binding` however, Use `Legacy Scroll Binding` instead in the type & configure it in OTD's Tool tab.
 
 This is due to an external issue on my Avalonia port of some UI Controls & would require a lot more work to implement.
+See https://github.com/Mrcubix/OpenTabletDriver.External/issues/1 for more details.
 
 You may additionally copy the store from OTD's settings to ClickTap's settings. 
 (The settings file can be found in ./userdata/settings.json (Windows) or in your local appdata directory)
