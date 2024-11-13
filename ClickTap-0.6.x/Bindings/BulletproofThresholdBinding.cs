@@ -33,16 +33,16 @@ namespace ClickTap.Bindings
 
         public override void Construct() => Binding = Store?.Construct<IBinding>(Provider, Tablet);
 
-        public override void Press()
+        public override void Press(IDeviceReport report)
         {
             if (Binding is IStateBinding stateBinding)
-                stateBinding.Press(null!, null!);
+                stateBinding.Press(Tablet, report);
         }
 
-        public override void Release()
+        public override void Release(IDeviceReport report)
         {
             if (Binding is IStateBinding stateBinding)
-                stateBinding.Release(null!, null!);
+                stateBinding.Release(Tablet, report);
         }
 
         public override SerializableBinding ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)

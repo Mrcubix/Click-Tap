@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ClickTap.Lib.Entities.Serializable;
 using Newtonsoft.Json;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace ClickTap.Lib.Bindings
 {
@@ -18,15 +19,15 @@ namespace ClickTap.Lib.Bindings
 
         protected bool PreviousState { set; get; }
 
-        public abstract void Press();
-        public abstract void Release();
+        public abstract void Press(IDeviceReport report);
+        public abstract void Release(IDeviceReport report);
 
-        public virtual void Invoke(bool newState)
+        public virtual void Invoke(IDeviceReport report, bool newState)
         {
             if (newState && !PreviousState)
-                Press();
+                Press(report);
             else if (!newState && PreviousState)
-                Release();
+                Release(report);
 
             PreviousState = newState;
         }

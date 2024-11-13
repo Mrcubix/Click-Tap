@@ -25,13 +25,18 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     #region Fields
 
-    private List<Binding?> _bindings = new();
     private IOutputMode? _outputMode;
     private ClickTapDaemon? _daemon;
     private BulletproofBindableProfile _profile = null!;
     private BulletproofSharedTabletReference? _tablet;
     private bool _awaitingDaemon;
     private bool _initialized;
+
+    private ThresholdBinding? _currentTipBinding;
+    private bool _thresholdReached;
+    private float _currentPressurePercent;
+
+    private IAuxReport? _currentAuxReport;
     private bool _awaitingRelease;
 
     #endregion
@@ -170,82 +175,54 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         // https://101.wacom.com/userhelp/en/AdvancedOptions.htm
         // https://github.com/OpenTabletDriver/OpenTabletDriver/issues/3165
 
-        if (report is IAuxReport auxReport)
-            HandleAuxiliaryReport(Tablet, auxReport);
+        // Reset the current tip binding
+        _currentTipBinding = null;
+
         if (report is ITabletReport tabletReport)
-            HandleTabletReport(Tablet, Tablet.Properties.Specifications.Pen, tabletReport);
+            HandleTabletReport(Tablet.Properties.Specifications.Pen, tabletReport);
+        if (report is IAuxReport auxReport)
+            _currentAuxReport = auxReport;
+
+        HandleAuxiliaryReport(_currentAuxReport!);
+
+        // Handle the tip or eraser when used LAST
+        _currentTipBinding?.Invoke(report, _thresholdReached && _awaitingRelease == false);
     }
 
-    private void HandleTabletReport(TabletReference tablet, PenSpecifications pen, ITabletReport report)
+    private void HandleTabletReport(PenSpecifications pen, ITabletReport report)
     {
-        // We handle pen buttons first, as the Tip and Eraser need to be handled separately from them
-        HandleBindingCollection(tablet, report, _profile!.PenButtons, report.PenButtons);
-
-        HandleTips(pen, report);
-    }
-
-    private void HandleTips(PenSpecifications pen, ITabletReport report)
-    {
-        float pressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
-        ThresholdBinding? binding;
-
-        ResetTipState(pressurePercent);
+        _currentPressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
 
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
-            binding = _profile?.Eraser;
+            _currentTipBinding = _profile?.Eraser;
         else
-            binding = _profile?.Tip;
+            _currentTipBinding = _profile?.Tip;
 
-        // It could potentially be an issue if the eraser or tip is unbound
-        if (binding != null && _bindings.Count > 0 &&
-            pressurePercent > binding.ActivationThreshold)
-            HandleClickTap(binding);
-        else if (!_awaitingRelease) // No bindings are active, invoke the binding
-            binding?.Invoke(pressurePercent);
-    }
+        _thresholdReached = _currentPressurePercent > _currentTipBinding?.ActivationThreshold;
 
-    private void HandleClickTap(ThresholdBinding binding)
-    {
-        _awaitingRelease = true;
-
-        // Disable the tip or eraser
-        binding.Invoke(false);
-
-        // Enable the bindings instead
-        foreach (var b in _bindings)
-            b?.Invoke(true);
-    }
-
-    // TODO: This looks bad, a rewrite is in order
-    private void ResetTipState(float pressurePercent)
-    {
-        if (pressurePercent == 0f && _awaitingRelease)
-        {
+        if (_currentPressurePercent == 0f && _awaitingRelease)
             _awaitingRelease = false;
 
-            foreach (var b in _bindings)
-                b?.Invoke(false);
-        }
+        HandleBindingCollection(report, _profile!.PenButtons, report.PenButtons);
     }
 
-    private void HandleAuxiliaryReport(TabletReference tablet, IAuxReport report)
+    private void HandleAuxiliaryReport(IAuxReport report)
     {
-        HandleBindingCollection(tablet, report, _profile!.AuxButtons, report.AuxButtons);
+        if (report != null)
+            HandleBindingCollection(report, _profile!.AuxButtons, report.AuxButtons);
     }
 
-    private void HandleBindingCollection(TabletReference tablet, IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
+    private void HandleBindingCollection(IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
     {
         for (int i = 0; i < newStates.Count; i++)
-            if (bindings[i] != null && newStates[i] && bindings[i]!.State == false)
-                _bindings.Add(bindings[i]);
-            else // TODO: i shouldn't have to do this, but i need to figure out how to do it without
-                ResetCollectionBinding(bindings[i]);
-    }
+        {
+            bool newState = newStates[i] && _thresholdReached;
+            bindings[i]?.Invoke(report, newState);
 
-    private void ResetCollectionBinding(Binding? binding)
-    {
-        binding?.Invoke(false);
-        _bindings.Remove(binding);
+            // We need to track if a binding was invoked with true
+            if (newState)
+                _awaitingRelease = true;
+        }
     }
 
     #endregion

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using ClickTap.Lib.Entities.Serializable.Bindings;
 using Newtonsoft.Json;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace ClickTap.Lib.Bindings
 {
@@ -22,11 +23,11 @@ namespace ClickTap.Lib.Bindings
         [JsonProperty]
         public float ActivationThreshold { set; get; }
 
-        public virtual void Invoke(float value)
+        public virtual void Invoke(IDeviceReport report, float value)
         {
             bool newState = value > ActivationThreshold;
 
-            base.Invoke(newState);
+            base.Invoke(report, newState);
         }
     }
 }
