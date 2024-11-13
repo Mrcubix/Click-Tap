@@ -63,16 +63,10 @@ namespace TouchGestures
 
                 // ALL that extra reflection bs just to get valid keys
                 var property = store.GetTypeInfo()?.FindPropertyWithAttribute<PropertyValidatedAttribute>();
+                var attribute = property?.GetCustomAttribute<PropertyValidatedAttribute>();
 
-                if (property == null)
-                    continue;
-
-                var attribute = property.GetCustomAttribute<PropertyValidatedAttribute>();
-
-                if (attribute == null)
-                    continue;
-
-                var validKeys = attribute.GetValue<IEnumerable<string>>(property);
+                IEnumerable<string> validKeys = attribute?.GetValue<IEnumerable<string>>(property) ?? 
+                                                Array.Empty<string>();
 
                 var serializablePlugin = new SerializablePlugin(plugin.GetCustomAttribute<PluginNameAttribute>()?.Name,
                                                                 plugin.FullName,

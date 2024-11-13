@@ -162,7 +162,9 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     public void Consume(IDeviceReport report)
     {
-        HandleBinding(report);
+        if (_initialized)
+            HandleBinding(report);
+
         Emit?.Invoke(report);
     }
 
@@ -183,7 +185,8 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         if (report is IAuxReport auxReport)
             _currentAuxReport = auxReport;
 
-        HandleAuxiliaryReport(_currentAuxReport!);
+        if (_currentAuxReport != null)
+            HandleAuxiliaryReport(_currentAuxReport);
 
         // Handle the tip or eraser when used LAST
         _currentTipBinding?.Invoke(report, _thresholdReached && _awaitingRelease == false);
@@ -194,22 +197,21 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         _currentPressurePercent = (float)report.Pressure / (float)pen.MaxPressure * 100f;
 
         if (report is IEraserReport eraserReport && eraserReport.Eraser)
-            _currentTipBinding = _profile?.Eraser;
+            _currentTipBinding = _profile.Eraser;
         else
-            _currentTipBinding = _profile?.Tip;
+            _currentTipBinding = _profile.Tip;
 
         _thresholdReached = _currentPressurePercent > _currentTipBinding?.ActivationThreshold;
 
         if (_currentPressurePercent == 0f && _awaitingRelease)
             _awaitingRelease = false;
 
-        HandleBindingCollection(report, _profile!.PenButtons, report.PenButtons);
+        HandleBindingCollection(report, _profile.PenButtons, report.PenButtons);
     }
 
     private void HandleAuxiliaryReport(IAuxReport report)
     {
-        if (report != null)
-            HandleBindingCollection(report, _profile!.AuxButtons, report.AuxButtons);
+        HandleBindingCollection(report, _profile.AuxButtons, report.AuxButtons);
     }
 
     private void HandleBindingCollection(IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
