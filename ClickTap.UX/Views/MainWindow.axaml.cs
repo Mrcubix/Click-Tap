@@ -1,7 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Entities.Serializable.Bindings;
@@ -73,7 +73,7 @@ public partial class MainWindow : AppMainWindow
             var currentPlugin = plugins.FirstOrDefault(p => p.Identifier == e.PluginProperty?.Identifier);
             var selectedType = currentPlugin?.PluginName ?? currentPlugin?.FullName ?? "Unknown";
 
-            var validProperties = currentPlugin?.ValidProperties ?? new string[0];
+            var validProperties = currentPlugin?.ValidProperties ?? Array.Empty<string>();
             var selectedProperty = e.PluginProperty?.Value ?? "";
 
             // Now we set the view model's properties
