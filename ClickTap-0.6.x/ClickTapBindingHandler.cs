@@ -203,8 +203,8 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
         _thresholdReached = _currentPressurePercent > _currentTipBinding?.ActivationThreshold;
 
-        if (_currentPressurePercent == 0f && _awaitingRelease)
-            _awaitingRelease = false;
+        // PENDING: Could prob make it work using just _thresholdReached instead of full release
+        _awaitingRelease &= _currentPressurePercent != 0f; 
 
         HandleBindingCollection(report, _profile.PenButtons, report.PenButtons);
     }
@@ -222,8 +222,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             bindings[i]?.Invoke(report, newState);
 
             // We need to track if a binding was invoked with true
-            if (newState)
-                _awaitingRelease = true;
+            _awaitingRelease |= newState;
         }
     }
 
