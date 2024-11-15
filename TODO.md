@@ -3,6 +3,9 @@
 - [x] Bindings
 - [x] Tablet Reference
 - [ ] Handler
+  - [ ] Figure out a way to not just handle every aux buttons, on every reports. (Handler)
+  - [ ] Plugin without PropertyValidatedAttribute should be supported (Bindings) (Semi-external)
+  - [ ] When multiple properties are supported in OpenTabletDriver.External, we need to feed all settings (Bindings) (External)
 - [x] Daemon
 
 ## UX

@@ -184,7 +184,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             HandleTabletReport(Tablet.Properties.Specifications.Pen, tabletReport);
         if (report is IAuxReport auxReport)
             _currentAuxReport = auxReport;
-
+        // TODO: Figure out a way to not just handle every aux buttons, on every reports.
         if (_currentAuxReport != null)
             HandleAuxiliaryReport(_currentAuxReport);
 
