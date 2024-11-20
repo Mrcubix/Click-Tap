@@ -173,20 +173,13 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         if (Tablet == null || !_initialized)
             return;
 
-        // TODO: Actually implement the click & Tap functionality following :
-        // https://101.wacom.com/userhelp/en/AdvancedOptions.htm
-        // https://github.com/OpenTabletDriver/OpenTabletDriver/issues/3165
-
         // Reset the current tip binding
         _currentTipBinding = null;
 
         if (report is ITabletReport tabletReport)
             HandleTabletReport(Tablet.Properties.Specifications.Pen, tabletReport);
         if (report is IAuxReport auxReport)
-            _currentAuxReport = auxReport;
-        // TODO: Figure out a way to not just handle every aux buttons, on every reports.
-        if (_currentAuxReport != null)
-            HandleAuxiliaryReport(_currentAuxReport);
+            HandleAuxiliaryReport(auxReport);
 
         // Handle the tip or eraser when used LAST
         _currentTipBinding?.Invoke(report, _thresholdReached && _awaitingRelease == false);
@@ -201,10 +194,15 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         else
             _currentTipBinding = _profile.Tip;
 
+        bool _oldThresholdState = _thresholdReached;
         _thresholdReached = _currentPressurePercent > _currentTipBinding?.ActivationThreshold;
 
         // PENDING: Could prob make it work using just _thresholdReached instead of full release
-        _awaitingRelease &= _currentPressurePercent != 0f; 
+        _awaitingRelease &= _currentPressurePercent != 0f;
+
+        // We need to trigger an update on aux buttons on state change
+        if (_oldThresholdState != _thresholdReached && _currentAuxReport != null)
+            HandleAuxiliaryReport(_currentAuxReport);
 
         HandleBindingCollection(report, _profile.PenButtons, report.PenButtons);
     }
@@ -212,6 +210,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
     private void HandleAuxiliaryReport(IAuxReport report)
     {
         HandleBindingCollection(report, _profile.AuxButtons, report.AuxButtons);
+        _currentAuxReport = report;
     }
 
     private void HandleBindingCollection(IDeviceReport report, IList<Binding?> bindings, IList<bool> newStates)
