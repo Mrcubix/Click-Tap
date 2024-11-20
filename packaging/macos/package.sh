@@ -6,6 +6,7 @@ set -eu
 
 PKG_SCRIPT_ROOT="$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
 RUNTIMES=("osx-arm64" "osx-x64")
+SHARED_NATIVE_DEPS=("libAvaloniaNative.dylib" "libHarfBuzzSharp.dylib" "libSkiaSharp.dylib")
 
 print_help() {
   echo "Usage: ${BASH_SOURCE[0]} [OPTIONS]..."
@@ -83,15 +84,18 @@ echo "Copying shared libraries..."
 
 # Move shared libraries
 mkdir -p "${pkg_root}/Contents/MacOS/shared"
-cp -r "${pkg_root}/Contents/MacOS/osx-x64/"*.dylib "${pkg_root}/Contents/MacOS/shared/"
+
+for shared_dep in "${SHARED_NATIVE_DEPS[@]}"; do
+  mv "build/ux/osx-x64/${shared_dep}" "${pkg_root}/Contents/MacOS/shared/${shared_dep}"
+done
 
 # Remove the dylib from the other runtimes
 for runtime in "${RUNTIMES[@]}"; do
   rm -rf "${pkg_root}/Contents/MacOS/${runtime}/"*.dylib
 
   # Instead symlink the shared dylib
-  for libs in "${pkg_root}/Contents/MacOS/shared"/*.dylib; do
-    ln -snf ../shared/$(basename "${libs}") "${pkg_root}/Contents/MacOS/${runtime}/$(basename "${libs}")"
+  for shared_dep in "${SHARED_NATIVE_DEPS[@]}"; do
+    ln -snf ../shared/"${shared_dep}" "${pkg_root}/Contents/MacOS/${runtime}/${shared_dep}"
   done
 done
 
