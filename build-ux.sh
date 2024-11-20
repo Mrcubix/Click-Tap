@@ -41,7 +41,7 @@ macplatforms=("osx-x64" "osx-arm64")
 
 for platform in "${macplatforms[@]}"
 do
-    dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r $platform -o build/ux/$platform -p:IncludeNativeLibrariesForSelfExtract=false
+    dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r $platform -o build/ux/$platform -p:IncludeNativeLibrariesForSelfExtract=false -p:SelfContained=true -p:PublishSingleFile=false
 done
 
 find ./build/ux -name "*.pdb" -type f -delete
