@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <SelfContained>false</SelfContained>
-    <IncludeNativeLibrariesForSelfExtract>false</IncludeNativeLibrariesForSelfExtract>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <PublishSingleFile>true</PublishSingleFile>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
