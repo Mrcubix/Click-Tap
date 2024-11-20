@@ -37,6 +37,7 @@ do
     dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r $platform -o build/ux/$platform 
 done
 
+# build the desktop on mac separately as they require specific parameters to work properly?
 macplatforms=("osx-x64" "osx-arm64")
 
 for platform in "${macplatforms[@]}"
