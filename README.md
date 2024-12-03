@@ -83,3 +83,8 @@ THIS ALSO MEANS THAT MULTI-KEY BINDINGS WILL NOT WORK, unless you copy the setti
 
 2. The implementation for both the UX & the plugin is still fragile, and might be prone to breaking, if such things occur, 
 Open an Issue with OTD's diagnostics (Help > Export Diagnostics). & Stacktrace potentially obtained from The event viewer on Windows, or your terminal on Linux
+
+## Packaging
+
+You may run any of the packaging scripts from the root of the repo.
+The linux packaging script, need to be run in a Unix-based environment. (Linux, MacOS, maybe WSL?)
