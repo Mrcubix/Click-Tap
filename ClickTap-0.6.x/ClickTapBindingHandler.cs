@@ -10,7 +10,6 @@ using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
-using TouchGestures;
 
 namespace ClickTap;
 
@@ -54,7 +53,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         ClickTapDaemon.DaemonLoaded += OnDaemonLoaded;
         _awaitingDaemon = true;
     }
-
+#if DEBUG
     private static void WaitForDebugger()
     {
         Console.WriteLine("Waiting for debugger to attach...");
@@ -64,7 +63,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             Thread.Sleep(100);
         }
     }
-
+#endif
     public void Initialize()
     {
         FetchOutputMode();
@@ -80,7 +79,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             InitializeCore(Tablet);
 
         if (_daemon == null)
-            Log.Write(PLUGIN_NAME, "Touch Gestures Daemon has not been enabled, please enable it in the 'Tools' tab", LogLevel.Error);
+            Log.Write(PLUGIN_NAME, "Click & Tap Daemon has not been enabled, please enable it in the 'Tools' tab", LogLevel.Error, false, true);
     }
 
     private void InitializeCore(TabletReference tablet)
@@ -102,7 +101,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
                 _initialized = true;
             }
 
-            Log.Write(PLUGIN_NAME, "Now handling touch gesture for: " + _tablet.Name);
+            Log.Write(PLUGIN_NAME, "Now handling Click & Tap for: " + _tablet.Name);
         }
     }
 
@@ -162,15 +161,13 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     public void Consume(IDeviceReport report)
     {
-        if (_initialized)
-            HandleBinding(report);
-
+        HandleBinding(report);
         Emit?.Invoke(report);
     }
 
     public void HandleBinding(IDeviceReport report)
     {
-        if (Tablet == null || !_initialized)
+        if (Tablet == null || _initialized == false)
             return;
 
         // Reset the current tip binding

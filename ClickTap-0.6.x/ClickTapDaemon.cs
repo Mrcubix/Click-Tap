@@ -10,7 +10,7 @@ using ClickTap.Lib.Extensions;
 using ClickTap.Entities;
 using ClickTap.Bindings;
 
-namespace TouchGestures
+namespace ClickTap
 {
     public class BulletproofClickTapDaemonBase : ClickTapDaemonBase<BulletproofBindableProfile, 
                                                                     BulletproofBinding, 
