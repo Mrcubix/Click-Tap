@@ -11,7 +11,7 @@ if ! (bash "./build-plugin.sh"); then
     exit 1
 fi
 
- run ./build-ux.sh and check exit code
+# run ./build-ux.sh and check exit code
 if ! (bash ./build-ux.sh); then
     echo "Failed to build UX"
     exit 1
