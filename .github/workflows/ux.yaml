@@ -19,11 +19,18 @@ on:
 
 jobs:
 
-  Build:
+  package:
 
     strategy:
       matrix:
-        runtime: [win-x64, win-x86, win-arm64, linux-x64, linux-arm64, linux-arm, osx-x64, osx-arm64]
+        runtimes: 
+          - { runtime: win-x64, os: windows }
+          - { runtime: win-x86, os: windows }
+          - { runtime: win-arm64, os: windows }
+          - { runtime: linux-x64, os: linux }
+          - { runtime: linux-arm64, os: linux }
+          - { runtime: linux-arm, os: linux }
+          - { runtime: osx-universal, os: macos }
 
     runs-on: ubuntu-latest
 
@@ -38,22 +45,48 @@ jobs:
         dotnet-version: |
           8.0.x
 
-    - name: Build
-      env:
-        platform: ${{ matrix.runtime }}
-      run: dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r ${{ matrix.runtime }} -o build/ux/${{ matrix.runtime }}
+    - name: Build Non-Universal
+      if: matrix.runtimes.os != 'macos'
+      run: dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r ${{ matrix.runtimes.runtime }} -o build/ux/${{ matrix.runtimes.runtime }}
 
-    - name: Remove PDB files
+    - name: Build Universal
+      if: matrix.runtimes.os == 'macos'
       run: |
-        find ./build/ux/${{ matrix.runtime }} -name '*.pdb' -type f -delete
+        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-x64 -o build/ux/osx-x64
+        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-arm64 -o build/ux/osx-arm64
 
-    - name: Generate artifact name
-      env:
-        platform: ${{ matrix.runtime }}
-      run: echo "artifact_name=ClickTap.UX-${{ matrix.runtime }}" >> $GITHUB_ENV
+    - name: Create Packages Directory
+      run: mkdir -p build/packages
+
+    - name: Install tree (debug)
+      run: sudo apt install -y tree
+
+    - name: Generate Windows Filename 
+      if: matrix.runtimes.os == 'windows'
+      run: |
+        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.zip" >> $GITHUB_ENV
+        echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
+        jar -cfM build/packages/ClickTap.UX-${{ matrix.runtimes.runtime }}.zip build/ux/${{ matrix.runtimes.runtime }}
+
+    - name: Generate Linux Filename 
+      if: matrix.runtimes.os == 'linux'
+      run: |
+        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.tar.gz" >> $GITHUB_ENV
+        echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
+        ./packaging/linux/package.sh --package tarball --runtime ${{ matrix.runtimes.runtime }}
+
+    - name: Generate OSX Filename 
+      if: matrix.runtimes.os == 'macos'
+      run: |
+        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.tar.gz" >> $GITHUB_ENV
+        echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
+        ./packaging/macos/package.sh
 
     - uses: actions/upload-artifact@main
       name: Upload artifact
+      env:
+        name: ${{ env.name }}
+        filename: ${{ env.filename }}
       with:
-        name: ${{ env.artifact_name }}
-        path: build/ux/${{ matrix.runtime }}
+        name: ${{ env.name }}
+        path: build/packages/${{ env.filename }}

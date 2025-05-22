@@ -7,7 +7,7 @@
 ### Global variables
 
 PKG_SCRIPT_ROOT="$(readlink -f $(dirname "${BASH_SOURCE[0]}"))"
-GENERIC_FILES="$(readlink -f "${PKG_SCRIPT_ROOT}/Generic")"
+GENERIC_FILES="$(readlink -f "${PKG_SCRIPT_ROOT}/generic")"
 
 ### Helper functions
 

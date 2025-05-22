@@ -10,7 +10,6 @@ SHARED_NATIVE_DEPS=("libAvaloniaNative.dylib" "libHarfBuzzSharp.dylib" "libSkiaS
 
 print_help() {
   echo "Usage: ${BASH_SOURCE[0]} [OPTIONS]..."
-  print_common_arg_help
   echo
   echo "Platform-specific options:"
   echo "  --output <output_dir>         Directory to write the package to"
@@ -65,7 +64,7 @@ cleanup_macos_build
 
 echo -e "\nPreparing package..."
 
-pkg_file="${PACKAGE_LNAME}-osx.tar.gz"
+pkg_file="${PACKAGE_LNAME}-osx-universal.tar.gz"
 pkg_root="${OUTPUT}/${PACKAGE_NAME}.app"
 
 echo "Copying binaries..."
@@ -86,7 +85,7 @@ echo "Copying shared libraries..."
 mkdir -p "${pkg_root}/Contents/MacOS/shared"
 
 for shared_dep in "${SHARED_NATIVE_DEPS[@]}"; do
-  mv "build/ux/osx-x64/${shared_dep}" "${pkg_root}/Contents/MacOS/shared/${shared_dep}"
+  cp "build/ux/osx-x64/${shared_dep}" "${pkg_root}/Contents/MacOS/shared/${shared_dep}"
 done
 
 # Remove the dylib from the other runtimes
