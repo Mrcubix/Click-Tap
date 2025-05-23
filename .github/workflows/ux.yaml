@@ -52,8 +52,8 @@ jobs:
     - name: Build Universal
       if: matrix.runtimes.os == 'macos'
       run: |
-        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-x64 -o build/ux/osx-x64 -p:IncludeNativeLibrariesForSelfExtract=false -p:SelfContained=true -p:PublishSingleFile=false
-        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-arm64 -o build/ux/osx-arm64 -p:IncludeNativeLibrariesForSelfExtract=false -p:SelfContained=true -p:PublishSingleFile=false
+        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-x64 -o build/ux/osx-x64 -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=false  
+        dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r osx-arm64 -o build/ux/osx-arm64 -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=false -p:IncludeNativeLibrariesForSelfExtract=false 
 
     - name: Create Packages Directory
       run: mkdir -p build/packages
