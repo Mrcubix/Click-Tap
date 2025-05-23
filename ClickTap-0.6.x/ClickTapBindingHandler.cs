@@ -235,9 +235,33 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
     public void OnProfileChanged(object? sender, EventArgs e)
     {
         if (_profile == null)
+        {
             Log.Write(PLUGIN_NAME, "Settings are null", LogLevel.Error);
-        else
-            Log.Debug(PLUGIN_NAME, "Settings updated");
+            return;
+        }
+
+        Log.Debug(PLUGIN_NAME, "Settings updated");
+
+        if (_profile.Tip?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Tip Binding: [{_profile.Tip.Binding}]@{_profile.Tip.ActivationThreshold}");
+
+        if (_profile.Eraser?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Eraser Binding: [{_profile.Eraser.Binding}]@{_profile.Eraser.ActivationThreshold}");
+
+        if (_profile.PenButtons != null && _profile.PenButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Pen Buttons: " + string.Join(", ", _profile.PenButtons.Select(b => b?.Binding)));
+
+        if (_profile.AuxButtons != null && _profile.AuxButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Aux Buttons: " + string.Join(", ", _profile.AuxButtons.Select(b => b?.Binding)));
+
+        if (_profile.MouseButtons != null && _profile.MouseButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Mouse Buttons: " + string.Join(", ", _profile.MouseButtons.Select(b => b?.Binding)));
+
+        if (_profile.MouseScrollUp?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Mouse Scroll Up: [{_profile.MouseScrollUp.Binding}]");
+
+        if (_profile.MouseScrollDown?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Mouse Scroll Down: [{_profile.MouseScrollDown.Binding}]");
     }
 
     #endregion
