@@ -64,21 +64,20 @@ jobs:
     - name: Generate Windows Filename 
       if: matrix.runtimes.os == 'windows'
       run: |
-        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.zip" >> $GITHUB_ENV
+        echo "path=build/ux/${{ matrix.runtimes.runtime }}/*" >> $GITHUB_ENV
         echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
-        jar -cfM build/packages/ClickTap.UX-${{ matrix.runtimes.runtime }}.zip build/ux/${{ matrix.runtimes.runtime }}
 
     - name: Generate Linux Filename 
       if: matrix.runtimes.os == 'linux'
       run: |
-        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.tar.gz" >> $GITHUB_ENV
+        echo "path=build/packages/ClickTap.UX${{ matrix.runtimes.runtime }}/*" >> $GITHUB_ENV
         echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
         ./packaging/linux/package.sh --package tarball --runtime ${{ matrix.runtimes.runtime }}
 
     - name: Generate OSX Filename 
       if: matrix.runtimes.os == 'macos'
       run: |
-        echo "filename=ClickTap.UX-${{ matrix.runtimes.runtime }}.tar.gz" >> $GITHUB_ENV
+        echo "path=build/packages/ClickTap.app" >> $GITHUB_ENV
         echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
         ./packaging/macos/package.sh
 
@@ -86,7 +85,7 @@ jobs:
       name: Upload artifact
       env:
         name: ${{ env.name }}
-        filename: ${{ env.filename }}
+        path: ${{ env.path }}
       with:
         name: ${{ env.name }}
-        path: build/packages/${{ env.filename }}
+        path: ${{ env.path }}
