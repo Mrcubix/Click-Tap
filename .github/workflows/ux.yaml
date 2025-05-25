@@ -70,7 +70,7 @@ jobs:
     - name: Generate Linux Filename 
       if: matrix.runtimes.os == 'linux'
       run: |
-        echo "path=build/packages/ClickTap.UX${{ matrix.runtimes.runtime }}/*" >> $GITHUB_ENV
+        echo "path=build/packages/ClickTap.UX/*" >> $GITHUB_ENV
         echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
         ./packaging/linux/package.sh --package tarball --runtime ${{ matrix.runtimes.runtime }}
 
