@@ -80,9 +80,11 @@ jobs:
     - name: Generate OSX Filename 
       if: matrix.runtimes.os == 'macos'
       run: |
-        echo "path=build/packages/ClickTap.app" >> $GITHUB_ENV
+        echo "path=build/packages/mac-tmp" >> $GITHUB_ENV
         echo "name=ClickTap.UX-${{ matrix.runtimes.runtime }}" >> $GITHUB_ENV
         ./packaging/macos/package.sh
+        mkdir build/packages/mac-tmp
+        mv build/packages/ClickTap.app build/packages/mac-tmp/ClickTap.app
 
     - uses: actions/upload-artifact@main
       name: Upload artifact
