@@ -8,14 +8,16 @@ on:
         required: true
 
 jobs:
-  release:
-    permissions:
-      contents: write
+
+  buildux:
+
+    strategy:
+      matrix:
+        runtime: [win-x64, win-x86, win-arm64, linux-x64, linux-arm64, linux-arm, osx-x64, osx-arm64]
 
     runs-on: ubuntu-latest
-    name: Generate Release
-    env:
-      TAG: ${{ github.event.inputs.tag }}
+
+    name: Build UX
 
     steps:
     - uses: actions/checkout@v4
@@ -26,23 +28,138 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          5.0.x
-          6.0.x
           8.0.x
 
     - name: Build
-      run: bash ./build.sh
-
-    - name: Create Release
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        platform: ${{ matrix.runtime }}
+      run: dotnet publish ClickTap.UX.Desktop -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -r ${{ matrix.runtime }} -o build/ux/${{ matrix.runtime }}
+
+
+  buildplugin:
+
+    runs-on: ubuntu-latest
+
+    name: Build Plugin
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          6.0.x
+
+    - name: Build
       run: |
-        declare -a files
-        # Add Installers
-        #files+=("build/installer/0.5.x/ClickTap.Installer-0.5.x.zip")
-        files+=("build/plugin/0.6.x/ClickTap-0.6.x.zip")
-        # Add all ux zip files
-        for file in build/ux/*.zip; do
+        bash ./build-plugin.sh --no-zip
+
+    - name: Add To Output
+      id: files_output
+      run: |
+        #echo 'files=["ClickTap-0.5.x.zip", "ClickTap-0.6.x.zip"]' >> $GITHUB_OUTPUT
+        echo 'files=["ClickTap-0.6.x.zip"]' >> $GITHUB_OUTPUT
+
+    outputs:
+      files: ${{ steps.files_output.outputs.files }}
+
+  windows:
+
+    strategy:
+      matrix:
+        runtime: [win-x64, win-x86, win-arm64]
+
+    runs-on: windows-latest
+
+    name: Package Windows
+
+    needs: [buildux, buildplugin]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+
+    - name: Compress
+      run: zip -r ClickTap.UX-${{ matrix.runtime }}.zip build/ux/${{ matrix.runtime }}
+
+  linux:
+
+    strategy:
+      matrix:
+        runtime: [linux-x64, linux-arm64, linux-arm]
+
+    runs-on: ubuntu-latest
+
+    name: Package Linux
+
+    needs: [buildux, buildplugin]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+
+    - name: Package
+      run: ./packaging/linux/package.sh --package tarball --runtime ${{ matrix.runtime }}
+
+  osx:
+
+    runs-on: ubuntu-latest
+
+    name: Package MacOS
+
+    needs: [buildux, buildplugin]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+
+    - name: Package
+      run: ./packaging/macos/package.sh
+
+  release:
+    permissions:
+      contents: write
+
+    runs-on: ubuntu-latest
+    name: Generate Release
+    needs: [windows, linux, osx]
+
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+
+    steps:
+    - name: Append Files
+      run: |
+        # start with the plugin files
+        declare -a files=("ClickTap-0.6.x.zip")
+
+        # append the ux files
+        for file in build/packages/*; do
           files+=("$file")
         done
+
         gh release create -d -t "Click & Tap $TAG" "$TAG" "${files[@]}" -F build/hashes.txt

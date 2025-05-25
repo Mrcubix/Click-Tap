@@ -80,9 +80,9 @@ namespace ClickTap.UX.ViewModels.Bindings
         // TODO: Get rid of this
         public override void UpdateProfile(SerializableProfile profile)
         {
-            profile.PenButtons = Bindings.Select(binding => (SerializableBinding?)binding.PluginProperty).ToArray();
-            profile.Tip = TipBindingDisplay.PluginProperty as SerializableThresholdBinding;
-            profile.Eraser = EraserBindingDisplay.PluginProperty as SerializableThresholdBinding;
+            profile.PenButtons = Bindings.Select(binding => binding.ToSerializableBinding()).ToArray();
+            profile.Tip = TipBindingDisplay.ToSerializableBinding() as SerializableThresholdBinding;
+            profile.Eraser = EraserBindingDisplay.ToSerializableBinding() as SerializableThresholdBinding;
         }
 
         #region Event Related

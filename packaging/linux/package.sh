@@ -11,7 +11,6 @@ mkdir -p build/packages
 
 print_help() {
   echo "Usage: ${BASH_SOURCE[0]} [OPTIONS]..."
-  print_common_arg_help
   echo
   echo "Platform-specific options:"
   echo "  --package <package_type>      Package generation script to run after build"

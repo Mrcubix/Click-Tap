@@ -86,9 +86,6 @@ namespace ClickTap.Lib
             // identify plugins
             IdentifyPlugins();
 
-            // construct bindings
-            //TouchGestureSettings?.ConstructBindings();
-
             SettingsChanged?.Invoke(this, ClickTapSettings);
 
             IsReady = true;

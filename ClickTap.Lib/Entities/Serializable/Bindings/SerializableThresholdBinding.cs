@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace ClickTap.Lib.Entities.Serializable.Bindings
 {
     public class SerializableThresholdBinding : SerializableBinding
@@ -14,6 +16,7 @@ namespace ClickTap.Lib.Entities.Serializable.Bindings
             ActivationThreshold = pluginProperty.ActivationThreshold;
         }
 
+        [JsonProperty]
         public float ActivationThreshold { get; set; }
     }
 }
