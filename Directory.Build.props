@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <NoWarn>$(NoWarn); NETSDK1138; VSTHRD200</NoWarn>
-    <AvaloniaVersion>11.0.10</AvaloniaVersion>
+    <AvaloniaVersion>11.3.0</AvaloniaVersion>
   </PropertyGroup>
 
   <Import Project="Targets/FixPackageId.targets" />

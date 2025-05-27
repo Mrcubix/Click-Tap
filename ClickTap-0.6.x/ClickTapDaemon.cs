@@ -61,6 +61,13 @@ namespace ClickTap
 
                 var store = new PluginSettingStore(plugin);
 
+                var type = store.GetTypeInfo();
+
+                if (type == null)
+                    continue; // type doesn't exist 
+
+                var properties = type.GetProperties();
+
                 // ALL that extra reflection bs just to get valid keys
                 var property = store.GetTypeInfo()?.FindPropertyWithAttribute<PropertyValidatedAttribute>();
                 var attribute = property?.GetCustomAttribute<PropertyValidatedAttribute>();
