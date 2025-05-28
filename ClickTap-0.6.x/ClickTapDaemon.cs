@@ -6,9 +6,10 @@ using OpenTabletDriver.External.Common.RPC;
 using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
-using ClickTap.Lib.Extensions;
 using ClickTap.Entities;
 using ClickTap.Bindings;
+using OpenTabletDriver.External.Common.Serializables.Properties;
+using ClickTap.Extensions;
 
 namespace ClickTap
 {
@@ -66,21 +67,39 @@ namespace ClickTap
                 if (type == null)
                     continue; // type doesn't exist 
 
-                var properties = type.GetProperties();
+                // There are situation where the name isn't specified, in which case we use the type's FullName
+                var pluginName = plugin.GetCustomAttribute<PluginNameAttribute>()?.Name 
+                                 ?? plugin.FullName ?? $"Plugin {IdentifierPluginPair.Key}";
 
-                // ALL that extra reflection bs just to get valid keys
-                var property = store.GetTypeInfo()?.FindPropertyWithAttribute<PropertyValidatedAttribute>();
-                var attribute = property?.GetCustomAttribute<PropertyValidatedAttribute>();
+                // We only support properties decoarted with the [Property] attribute
+                var properties = from property in type.GetProperties() 
+                                 let attrs = property.GetCustomAttributes(true)
+                                 where attrs.Any(attr => attr is PropertyAttribute)
+                                 select property;
 
-                IEnumerable<string> validKeys = attribute?.GetValue<IEnumerable<string>>(property) ?? 
-                                                Array.Empty<string>();
+                // We now need to serialized all properties
+                var serializedProperties = new List<SerializableProperty>();
 
-                var serializablePlugin = new SerializablePlugin(plugin.GetCustomAttribute<PluginNameAttribute>()?.Name,
-                                                                plugin.FullName,
-                                                                IdentifierPluginPair.Key,
-                                                                validKeys.ToArray());
+                try
+                {
+                    foreach (var property in properties)
+                    {
+                        var serialized = property.ToSerializable();
+                        serializedProperties.Add(serialized);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Write(PLUGIN_NAME, $"An Error occured while serializing a property from '{pluginName}': {ex.Message}", LogLevel.Error);
+                    continue;
+                }
 
-                plugins.Add(serializablePlugin);
+                plugins.Add(
+                    new SerializablePlugin(pluginName,
+                                           plugin.FullName,
+                                           IdentifierPluginPair.Key,
+                                           serializedProperties)
+                );
             }
 
             Log.Write(PLUGIN_NAME, $"Found {plugins.Count} Usable Bindings Plugins.");

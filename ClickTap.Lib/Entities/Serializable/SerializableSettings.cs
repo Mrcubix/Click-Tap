@@ -7,7 +7,7 @@ namespace ClickTap.Lib.Entities.Serializable
     public class SerializableSettings
     {
         [JsonProperty]
-        public int Version { get; set; } = 1;
+        public int Version { get; set; } = 2;
 
         [JsonProperty]
         public List<SerializableProfile> Profiles { get; set; } = new();

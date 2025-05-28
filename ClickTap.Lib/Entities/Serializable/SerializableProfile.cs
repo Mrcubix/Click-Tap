@@ -2,6 +2,7 @@ using System;
 using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.Lib.Tablet;
 using Newtonsoft.Json;
+using OpenTabletDriver.External.Common.Serializables;
 
 namespace ClickTap.Lib.Entities.Serializable
 {
@@ -14,25 +15,31 @@ namespace ClickTap.Lib.Entities.Serializable
         public string Name { get; set; } = string.Empty;
 
         [JsonProperty]
-        public SerializableThresholdBinding? Tip { get; set; }
+        public SerializablePluginSettingsStore? Tip { get; set; }
 
         [JsonProperty]
-        public SerializableThresholdBinding? Eraser { get; set; }
+        public float TipActivationThreshold { get; set; }
 
         [JsonProperty]
-        public SerializableBinding?[] PenButtons { get; set; } = Array.Empty<SerializableBinding>();
+        public SerializablePluginSettingsStore? Eraser { get; set; }
 
         [JsonProperty]
-        public SerializableBinding?[] AuxButtons { get; set; } = Array.Empty<SerializableBinding>();
+        public float EraserActivationThreshold { get; set; }
 
         [JsonProperty]
-        public SerializableBinding?[] MouseButtons { get; set; } = Array.Empty<SerializableBinding>();
+        public SerializablePluginSettingsStore?[] PenButtons { get; set; } = Array.Empty<SerializablePluginSettingsStore>();
 
         [JsonProperty]
-        public SerializableBinding? MouseScrollUp { get; set; }
+        public SerializablePluginSettingsStore?[] AuxButtons { get; set; } = Array.Empty<SerializablePluginSettingsStore>();
 
         [JsonProperty]
-        public SerializableBinding? MouseScrollDown { get; set; }
+        public SerializablePluginSettingsStore?[] MouseButtons { get; set; } = Array.Empty<SerializablePluginSettingsStore>();
+
+        [JsonProperty]
+        public SerializablePluginSettingsStore? MouseScrollUp { get; set; }
+
+        [JsonProperty]
+        public SerializablePluginSettingsStore? MouseScrollDown { get; set; }
 
         #endregion
 
@@ -51,9 +58,9 @@ namespace ClickTap.Lib.Entities.Serializable
 
         public void MatchSpecifications(SharedTabletReference tabletSpecifications)
         {
-            PenButtons = new SerializableBinding?[tabletSpecifications.Pen?.Buttons?.ButtonCount ?? 0];
-            AuxButtons = new SerializableBinding?[tabletSpecifications.AuxButtons?.ButtonCount ?? 0];
-            MouseButtons = new SerializableBinding?[tabletSpecifications.MouseButtons?.ButtonCount ?? 0];
+            PenButtons = new SerializablePluginSettingsStore?[tabletSpecifications.Pen?.Buttons?.ButtonCount ?? 0];
+            AuxButtons = new SerializablePluginSettingsStore?[tabletSpecifications.AuxButtons?.ButtonCount ?? 0];
+            MouseButtons = new SerializablePluginSettingsStore?[tabletSpecifications.MouseButtons?.ButtonCount ?? 0];
         }
 
         #endregion

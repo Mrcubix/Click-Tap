@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using ClickTap.Lib.Entities.Serializable;
 using ClickTap.UX.Events;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenTabletDriver.External.Avalonia.ViewModels;
@@ -24,7 +23,7 @@ public partial class StateBindingDisplayViewModel : BindingDisplayViewModel, IDi
         Initialize();
     }
 
-    public StateBindingDisplayViewModel(SerializablePluginSettings settings) : base(settings)
+    public StateBindingDisplayViewModel(SerializablePluginSettingsStore store) : base(store)
     {
         Initialize();
     }
@@ -42,17 +41,6 @@ public partial class StateBindingDisplayViewModel : BindingDisplayViewModel, IDi
 
     #endregion
 
-    #region Methods
-
-    public virtual SerializableBinding? ToSerializableBinding()
-    {
-        if (PluginProperty == null || PluginProperty.Value == null || PluginProperty.Identifier == -1) return null;
-        
-        return new SerializableBinding(PluginProperty.Value, PluginProperty.Identifier);
-    }
-
-    #endregion
-
     #region Event Handlers
 
     protected void OnBindingChanged(object? sender, BindingsChangedArgs e) => BindingChanged?.Invoke(this, e);
@@ -66,8 +54,10 @@ public partial class StateBindingDisplayViewModel : BindingDisplayViewModel, IDi
         }
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
+        base.Dispose();
+
         PropertyChanged -= OnPropertyChanged;
 
         BindingChanged = null;

@@ -5,7 +5,6 @@ using System.Linq;
 using Avalonia.Threading;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Tablet;
-using ClickTap.UX.Events;
 using ClickTap.UX.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,6 +17,7 @@ namespace ClickTap.UX.ViewModels.Bindings
         #region Fields
 
         private SerializableSettings _settings = new();
+        private TabletProfileOverview? _lastSelectedTablet;
 
         [ObservableProperty]
         private bool _isReady = false;
@@ -48,10 +48,6 @@ namespace ClickTap.UX.ViewModels.Bindings
         {
             IsReady = false;
             NextViewModel = this;
-
-            AuxiliarySettings.BindingsChanged += OnBindingsChanged;
-            PenSettings.BindingsChanged += OnBindingsChanged;
-            MouseSettings.BindingsChanged += OnBindingsChanged;
         }
 
         public BindingsOverviewViewModel(SerializableSettings settings) : this()
@@ -148,6 +144,16 @@ namespace ClickTap.UX.ViewModels.Bindings
                 OnTabletChanged(this, EventArgs.Empty);
         }
 
+        public void UpdateSelectedTabletProfile()
+        {
+            if (SelectedTablet == null)
+                return;
+
+            PenSettings.UpdateProfile(SelectedTablet.Profile);
+            MouseSettings.UpdateProfile(SelectedTablet.Profile);
+            AuxiliarySettings.UpdateProfile(SelectedTablet.Profile);
+        }
+
         /// <summary>
         ///   Request the save of the current bindings.
         /// </summary>
@@ -173,33 +179,14 @@ namespace ClickTap.UX.ViewModels.Bindings
         {
             if (SelectedTablet == null)
                 return;
+            
+            if (_lastSelectedTablet != null)
+                UpdateSelectedTabletProfile();
 
             Dispatcher.UIThread.InvokeAsync(() => PenSettings.Build(SelectedTablet, Plugins));
             Dispatcher.UIThread.InvokeAsync(() => MouseSettings.Build(SelectedTablet, Plugins));
             Dispatcher.UIThread.InvokeAsync(() => AuxiliarySettings.Build(SelectedTablet, Plugins));
         }
-
-        #region Gesture related events
-
-        private void OnBindingsChanged(object? sender, BindingsChangedArgs e)
-        {
-            if (sender is not AuxiliarySettingsViewModel auxiliarySettingsViewModel)
-                throw new ArgumentException($"Sender must be a {nameof(AuxiliarySettingsViewModel)} or inheritor.", nameof(sender));
-
-            if (e.Display is not StateBindingDisplayViewModel bindingDisplay)
-                throw new ArgumentException($"Sender must be a {nameof(StateBindingDisplayViewModel)} or inheritor.", nameof(sender));
-
-            if (SelectedTablet == null)
-                return;
-
-            // We need to update the content of the binding display
-            bindingDisplay.Content = AuxiliarySettingsViewModel.GetFriendlyContentFromProperty(bindingDisplay.PluginProperty, Plugins);
-
-            // TODO: disappointed, i shouldn't have to do that, look into rewriting the settings builder to modify the profile directly instead of having to update like this
-            auxiliarySettingsViewModel.UpdateProfile(SelectedTablet.Profile);
-        }
-
-        #endregion
 
         #endregion
 

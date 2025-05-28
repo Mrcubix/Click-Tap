@@ -268,6 +268,8 @@ public partial class MainViewModel : NavigableViewModel
 
     private void OnApplyRequested(object? sender, EventArgs e)
     {
+        // We take the risk of applying an outdated profile otherwise
+        BindingsOverviewViewModel.UpdateSelectedTabletProfile();
         _ = ApplySettingsAsync(BindingsOverviewViewModel.Settings);
     }
 
