@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ClickTap.Lib.Contracts;
+using ClickTap.Lib.Converters;
 using ClickTap.Lib.Entities.Serializable;
 using ClickTap.Lib.Tablet;
 using ClickTap.UX.ViewModels.Bindings;
@@ -47,6 +48,7 @@ public partial class MainViewModel : NavigableViewModel
         BindingsOverviewViewModel.ApplyRequested += OnApplyRequested;
 
         _client = new("ClickTapDaemon");
+        _client.Converters.Add(new SerializablePropertyConverter());
 
         _connectionScreenViewModel = new(_client);
 
@@ -201,7 +203,9 @@ public partial class MainViewModel : NavigableViewModel
     private void OnClientDisconnected(object? sender, EventArgs e)
     {
         IsReady = false;
-        _client.Instance.TabletsChanged -= OnTabletsChanged;
+
+        if (_client.Instance != null)
+            _client.Instance.TabletsChanged -= OnTabletsChanged;
 
         _ = Task.Run(AttemptReconnectionIndefinitelyAsync);
         NextViewModel = _connectionScreenViewModel;
@@ -241,6 +245,10 @@ public partial class MainViewModel : NavigableViewModel
         if (tempSettings != null)
         {
             _settings = tempSettings;
+
+            // TODO : Display Screen about plugin version being outdated
+            if (_settings.Version < 2)
+                return;
 
             // Always set the settings first
             Dispatcher.UIThread.Post(() => OnSettingsChanged(_settings));

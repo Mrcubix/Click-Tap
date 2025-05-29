@@ -124,6 +124,8 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             int oldSelectedTabletIndex = SelectedTabletIndex;
 
+            _lastSelectedTablet = SelectedTablet;
+
             // The selected tablet may still exist
             if (SelectedTablet != null)
                 SelectedTablet = Tablets.FirstOrDefault(x => x.Name == SelectedTablet.Name);
@@ -186,6 +188,8 @@ namespace ClickTap.UX.ViewModels.Bindings
             Dispatcher.UIThread.InvokeAsync(() => PenSettings.Build(SelectedTablet, Plugins));
             Dispatcher.UIThread.InvokeAsync(() => MouseSettings.Build(SelectedTablet, Plugins));
             Dispatcher.UIThread.InvokeAsync(() => AuxiliarySettings.Build(SelectedTablet, Plugins));
+
+            _lastSelectedTablet = SelectedTablet;
         }
 
         #endregion

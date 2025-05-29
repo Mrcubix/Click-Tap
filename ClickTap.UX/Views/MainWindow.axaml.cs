@@ -1,14 +1,9 @@
-using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Threading;
-using ClickTap.Lib.Entities.Serializable;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.UX.ViewModels;
-using ClickTap.UX.ViewModels.Bindings;
 using OpenTabletDriver.External.Avalonia.Dialogs;
 using OpenTabletDriver.External.Avalonia.ViewModels;
 using OpenTabletDriver.External.Avalonia.Views;
@@ -20,7 +15,6 @@ namespace ClickTap.UX.Views;
 public partial class MainWindow : AppMainWindow
 {
     private static readonly BindingEditorDialogViewModel _bindingEditorDialogViewModel = new();
-    private static readonly AdvancedBindingEditorDialogViewModel _advancedBindingEditorDialogViewModel = new();
 
     private bool _isEditorDialogOpen = false;
 
