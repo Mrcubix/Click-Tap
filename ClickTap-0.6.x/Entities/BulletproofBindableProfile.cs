@@ -2,7 +2,6 @@ using System.Reflection;
 using ClickTap.Bindings;
 using ClickTap.Lib.Entities.Bindable;
 using ClickTap.Lib.Entities.Serializable;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.Lib.Tablet;
 using OpenTabletDriver.Plugin.Tablet;
 
@@ -58,33 +57,37 @@ namespace ClickTap.Entities
             if (tablet is not BulletproofSharedTabletReference btablet)
                 return;
 
-            Clear();
-
+            var tabletReference = btablet.ServiceProvider.GetService(typeof(TabletReference)) as TabletReference;
             Name = profile.Name;
 
+            Clear();
+
             if (profile.Tip != null)
-                Tip = new BulletproofThresholdBinding(profile.Tip.ActivationThreshold, profile.Tip, identifierToPlugin);
+                Tip = new BulletproofThresholdBinding(profile.TipActivationThreshold, profile.Tip, identifierToPlugin);
+
+            profile.TipActivationThreshold = Tip?.ActivationThreshold ?? 1;
 
             if (profile.Eraser != null)
-                Eraser = new BulletproofThresholdBinding(profile.Eraser.ActivationThreshold, profile.Eraser, identifierToPlugin);
+                Eraser = new BulletproofThresholdBinding(profile.EraserActivationThreshold, profile.Eraser, identifierToPlugin);
 
-            PenButtons = profile.PenButtons.Select(penButton => penButton != null ? new BulletproofBinding(penButton, identifierToPlugin) : null)
+            profile.EraserActivationThreshold = Eraser?.ActivationThreshold ?? 1;
+
+            PenButtons = profile.PenButtons.Select(penButton => penButton != null ? new BulletproofBinding(penButton, tabletReference) : null)
                                            .ToArray();
 
-            AuxButtons = profile.AuxButtons.Select(auxButton => auxButton != null ? new BulletproofBinding(auxButton, identifierToPlugin) : null)
+            AuxButtons = profile.AuxButtons.Select(auxButton => auxButton != null ? new BulletproofBinding(auxButton, tabletReference) : null)
                                            .ToArray();
 
-            MouseButtons = profile.MouseButtons.Select(mouseButton => mouseButton != null ? new BulletproofBinding(mouseButton, identifierToPlugin) : null)
+            MouseButtons = profile.MouseButtons.Select(mouseButton => mouseButton != null ? new BulletproofBinding(mouseButton, tabletReference) : null)
                                                .ToArray();
 
             if (profile.MouseScrollUp != null)
-                MouseScrollUp = new BulletproofBinding(profile.MouseScrollUp, identifierToPlugin);
+                MouseScrollUp = new BulletproofBinding(profile.MouseScrollUp, tabletReference);
 
             if (profile.MouseScrollDown != null)
-                MouseScrollDown = new BulletproofBinding(profile.MouseScrollDown, identifierToPlugin);
+                MouseScrollDown = new BulletproofBinding(profile.MouseScrollDown, tabletReference);
 
             SetTablet(tablet);
-
             ConstructBindings(tablet);
         }
 
@@ -93,8 +96,10 @@ namespace ClickTap.Entities
             return new SerializableProfile()
             {
                 Name = Name,
-                Tip = Tip?.ToSerializable(identifierToPlugin) as SerializableThresholdBinding,
-                Eraser = Eraser?.ToSerializable(identifierToPlugin) as SerializableThresholdBinding,
+                Tip = Tip?.ToSerializable(identifierToPlugin),
+                TipActivationThreshold = Tip?.ActivationThreshold ?? 1,
+                Eraser = Eraser?.ToSerializable(identifierToPlugin),
+                EraserActivationThreshold = Eraser?.ActivationThreshold ?? 1,
                 PenButtons = PenButtons.Select(penButton => penButton?.ToSerializable(identifierToPlugin)).ToArray(),
                 AuxButtons = AuxButtons.Select(auxButton => auxButton?.ToSerializable(identifierToPlugin)).ToArray(),
                 MouseButtons = MouseButtons.Select(mouseButton => mouseButton?.ToSerializable(identifierToPlugin)).ToArray(),

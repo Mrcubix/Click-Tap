@@ -1,5 +1,4 @@
 using System;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.Lib.Tablet;
 using Newtonsoft.Json;
 using OpenTabletDriver.External.Common.Serializables;

@@ -10,6 +10,7 @@ using ClickTap.Entities;
 using ClickTap.Bindings;
 using OpenTabletDriver.External.Common.Serializables.Properties;
 using ClickTap.Extensions;
+using OpenTabletDriver.External.Common.Enums;
 
 namespace ClickTap
 {
@@ -35,7 +36,7 @@ namespace ClickTap
                                                             BulletproofThresholdBinding>>("ClickTapDaemon", this);
             Instance ??= this;
         }
-        
+#if DEBUG
         private void WaitForDebugger()
         {
             Console.WriteLine("Waiting for debugger to attach...");
@@ -45,16 +46,14 @@ namespace ClickTap
                 Thread.Sleep(100);
             }
         }
-
+#endif
         #endregion
 
-        #region RPC Methods
+        #region Methods
 
-        public override Task<List<SerializablePlugin>> GetPlugins()
+        protected override void SerializePlugins()
         {
-            Log.Write(PLUGIN_NAME, "Getting plugins...");
-
-            List<SerializablePlugin> plugins = new();
+            Plugins.Clear();
 
             foreach (var IdentifierPluginPair in IdentifierToPluginConversion)
             {
@@ -94,17 +93,18 @@ namespace ClickTap
                     continue;
                 }
 
-                plugins.Add(
+                Plugins.Add(
                     new SerializablePlugin(pluginName,
                                            plugin.FullName,
                                            IdentifierPluginPair.Key,
                                            serializedProperties)
+                    {
+                        Type = PluginType.Binding
+                    }
                 );
             }
 
-            Log.Write(PLUGIN_NAME, $"Found {plugins.Count} Usable Bindings Plugins.");
-
-            return Task.FromResult(plugins);
+            Log.Write(PLUGIN_NAME, $"Found {Plugins.Count} Usable Bindings Plugins.");
         }
 
         #endregion

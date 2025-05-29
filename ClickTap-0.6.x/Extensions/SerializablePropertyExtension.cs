@@ -4,6 +4,8 @@ using Newtonsoft.Json.Linq;
 using OpenTabletDriver.External.Common.Serializables.Properties;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.External.Common.Serializables;
+using OpenTabletDriver.External.Common.Enums;
+using OpenTabletDriver.Plugin;
 
 namespace ClickTap.Extensions
 {
@@ -13,7 +15,16 @@ namespace ClickTap.Extensions
         {
             { typeof(bool), JTokenType.Boolean },
             { typeof(int), JTokenType.Integer },
+            { typeof(uint), JTokenType.Integer },
+            { typeof(short), JTokenType.Integer },
+            { typeof(ushort), JTokenType.Integer },
+            { typeof(long), JTokenType.Integer },
+            { typeof(ulong), JTokenType.Integer },
+            { typeof(byte), JTokenType.Integer },
+            { typeof(sbyte), JTokenType.Integer },
+            { typeof(char), JTokenType.Integer },
             { typeof(float), JTokenType.Float },
+            { typeof(double), JTokenType.Float },
             { typeof(string), JTokenType.String },
             { typeof(IEnumerable), JTokenType.Array }
         };
@@ -26,15 +37,46 @@ namespace ClickTap.Extensions
                 throw new ArgumentException($"Property type {property.PropertyType} is not supported.");
 
             // ALL that extra reflection bs just to get valid keys
-            var attribute = property.GetCustomAttribute<PropertyValidatedAttribute>();
+            var validatedPropertyAttribute = property.GetCustomAttribute<PropertyValidatedAttribute>();
+            var sliderPropertyAttribute = property.GetCustomAttribute<SliderPropertyAttribute>();
 
-            if (attribute == null)
-                return new SerializableProperty(property.Name, type, Array.Empty<SerializableAttributeModifier>());
+            var modifiers = property.SerializeModifiers();
+
+            if (validatedPropertyAttribute == null)
+                return new SerializableProperty(property.Name, type, modifiers);
+            else if (sliderPropertyAttribute != null)
+                return new SerializableSliderProperty(property.Name, type, modifiers)
+                {
+                    Minimum = sliderPropertyAttribute.Min,
+                    Maximum = sliderPropertyAttribute.Max
+                };
             else
             {
-                var validKeys = attribute?.GetValue<IList>(property) ?? Array.Empty<object>();
-                return new SerializableValidatedProperty(property.Name, JTokenType.Array, validKeys, Array.Empty<SerializableAttributeModifier>());
+                // Get the name of the property holding the valid keys
+                var validKeysPropertyName = validatedPropertyAttribute.MemberName;
+                var owningType = property.DeclaringType!;
+                
+                var validKeysProperty = owningType.GetProperty(validKeysPropertyName);
+                var validKeys = validatedPropertyAttribute?.GetValue<IEnumerable>(validKeysProperty).Cast<object>().ToArray() ?? Array.Empty<object>();
+
+                return new SerializableValidatedProperty(property.Name, JTokenType.Array, validKeys, modifiers);
             }
+        }
+
+        internal static IEnumerable<SerializableAttributeModifier> SerializeModifiers(this PropertyInfo property)
+        {
+            var modifiers = new List<SerializableAttributeModifier>();
+            
+            if (property.GetCustomAttribute<UnitAttribute>() is { } unitAttribute)
+                modifiers.Add(new SerializableAttributeModifier(AttributeModifierType.Unit, unitAttribute.Unit));
+
+            if (property.GetCustomAttribute<ToolTipAttribute>() is { } toolTipAttribute)
+                modifiers.Add(new SerializableAttributeModifier(AttributeModifierType.Tooltip, toolTipAttribute.ToolTip));
+
+            if (property.GetCustomAttribute<DefaultPropertyValueAttribute>() is { } defaultValueAttribute)
+                modifiers.Add(new SerializableAttributeModifier(AttributeModifierType.DefaultValue, defaultValueAttribute.Value));
+
+            return modifiers;
         }
     }
 }
