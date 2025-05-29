@@ -12,3 +12,4 @@
 
 - [x] Same as OTD's Aux tab
 - [ ] Fix Profiles not being updated directly
+- [ ] Just rewrite the settings part, it's terrible

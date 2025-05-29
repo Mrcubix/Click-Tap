@@ -19,7 +19,7 @@ on:
 jobs:
 
   Build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -30,7 +30,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          5.0.x
           6.0.x
 
     - name: Build

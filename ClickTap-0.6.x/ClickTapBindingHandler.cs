@@ -10,7 +10,6 @@ using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
-using TouchGestures;
 
 namespace ClickTap;
 
@@ -54,7 +53,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
         ClickTapDaemon.DaemonLoaded += OnDaemonLoaded;
         _awaitingDaemon = true;
     }
-
+#if DEBUG
     private static void WaitForDebugger()
     {
         Console.WriteLine("Waiting for debugger to attach...");
@@ -64,7 +63,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             Thread.Sleep(100);
         }
     }
-
+#endif
     public void Initialize()
     {
         FetchOutputMode();
@@ -80,7 +79,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             InitializeCore(Tablet);
 
         if (_daemon == null)
-            Log.Write(PLUGIN_NAME, "Touch Gestures Daemon has not been enabled, please enable it in the 'Tools' tab", LogLevel.Error);
+            Log.Write(PLUGIN_NAME, "Click & Tap Daemon has not been enabled, please enable it in the 'Tools' tab", LogLevel.Error, false, true);
     }
 
     private void InitializeCore(TabletReference tablet)
@@ -102,7 +101,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
                 _initialized = true;
             }
 
-            Log.Write(PLUGIN_NAME, "Now handling touch gesture for: " + _tablet.Name);
+            Log.Write(PLUGIN_NAME, "Now handling Click & Tap for: " + _tablet.Name);
         }
     }
 
@@ -162,15 +161,13 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     public void Consume(IDeviceReport report)
     {
-        if (_initialized)
-            HandleBinding(report);
-
+        HandleBinding(report);
         Emit?.Invoke(report);
     }
 
     public void HandleBinding(IDeviceReport report)
     {
-        if (Tablet == null || !_initialized)
+        if (Tablet == null || _initialized == false)
             return;
 
         // Reset the current tip binding
@@ -238,9 +235,33 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
     public void OnProfileChanged(object? sender, EventArgs e)
     {
         if (_profile == null)
+        {
             Log.Write(PLUGIN_NAME, "Settings are null", LogLevel.Error);
-        else
-            Log.Debug(PLUGIN_NAME, "Settings updated");
+            return;
+        }
+
+        Log.Debug(PLUGIN_NAME, "Settings updated");
+
+        if (_profile.Tip?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Tip Binding: [{_profile.Tip.Binding}]@{_profile.Tip.ActivationThreshold}");
+
+        if (_profile.Eraser?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Eraser Binding: [{_profile.Eraser.Binding}]@{_profile.Eraser.ActivationThreshold}");
+
+        if (_profile.PenButtons != null && _profile.PenButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Pen Buttons: " + string.Join(", ", _profile.PenButtons.Select(b => b?.Binding)));
+
+        if (_profile.AuxButtons != null && _profile.AuxButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Aux Buttons: " + string.Join(", ", _profile.AuxButtons.Select(b => b?.Binding)));
+
+        if (_profile.MouseButtons != null && _profile.MouseButtons.Any(b => b?.Binding != null))
+            Log.Debug(PLUGIN_NAME, $"Mouse Buttons: " + string.Join(", ", _profile.MouseButtons.Select(b => b?.Binding)));
+
+        if (_profile.MouseScrollUp?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Mouse Scroll Up: [{_profile.MouseScrollUp.Binding}]");
+
+        if (_profile.MouseScrollDown?.Binding != null)
+            Log.Debug(PLUGIN_NAME, $"Mouse Scroll Down: [{_profile.MouseScrollDown.Binding}]");
     }
 
     #endregion
