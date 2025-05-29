@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClickTap.Lib.Entities.Serializable;
@@ -13,10 +14,10 @@ namespace ClickTap.UX.ViewModels.Bindings
         #region Bindings
 
         [ObservableProperty]
-        private ThresholdBindingDisplayViewModel _tipBindingDisplay = new(new SerializablePluginSettingsStore(string.Empty, string.Empty, 0), 1);
+        private ThresholdBindingDisplayViewModel _tipBindingDisplay = new(null!, 1);
 
         [ObservableProperty]
-        private ThresholdBindingDisplayViewModel _eraserBindingDisplay = new(new SerializablePluginSettingsStore(string.Empty, string.Empty, 0), 1);
+        private ThresholdBindingDisplayViewModel _eraserBindingDisplay = new(null!, 1);
 
         #endregion
 
@@ -77,9 +78,9 @@ namespace ClickTap.UX.ViewModels.Bindings
         {
             profile.PenButtons = Bindings.Select(binding => binding.Store).ToArray();
             profile.Tip = TipBindingDisplay.Store;
-            profile.TipActivationThreshold = TipBindingDisplay.ActivationThreshold;
+            profile.TipActivationThreshold = MathF.Round(TipBindingDisplay.ActivationThreshold);
             profile.Eraser = EraserBindingDisplay.Store;
-            profile.EraserActivationThreshold = EraserBindingDisplay.ActivationThreshold;
+            profile.EraserActivationThreshold = MathF.Round(EraserBindingDisplay.ActivationThreshold);
         }
 
         #endregion

@@ -12,10 +12,10 @@ namespace ClickTap.UX.ViewModels.Bindings
         #region Bindings
 
         [ObservableProperty]
-        private StateBindingDisplayViewModel _mouseScrollUpBindingDisplay = new(new SerializablePluginSettingsStore(string.Empty, string.Empty, 0));
+        private StateBindingDisplayViewModel _mouseScrollUpBindingDisplay = new();
 
         [ObservableProperty]
-        private StateBindingDisplayViewModel _mouseScrollDownBindingDisplay = new(new SerializablePluginSettingsStore(string.Empty, string.Empty, 0));
+        private StateBindingDisplayViewModel _mouseScrollDownBindingDisplay = new();
 
         #endregion
 
