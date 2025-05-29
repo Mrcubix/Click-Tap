@@ -65,12 +65,12 @@ namespace ClickTap.Entities
             if (profile.Tip != null)
                 Tip = new BulletproofThresholdBinding(profile.TipActivationThreshold, profile.Tip, identifierToPlugin);
 
-            profile.TipActivationThreshold = Tip?.ActivationThreshold ?? 1;
+            TipActivationThreshold = profile.TipActivationThreshold;
 
             if (profile.Eraser != null)
                 Eraser = new BulletproofThresholdBinding(profile.EraserActivationThreshold, profile.Eraser, identifierToPlugin);
 
-            profile.EraserActivationThreshold = Eraser?.ActivationThreshold ?? 1;
+            EraserActivationThreshold = profile.EraserActivationThreshold;
 
             PenButtons = profile.PenButtons.Select(penButton => penButton != null ? new BulletproofBinding(penButton, tabletReference) : null)
                                            .ToArray();
@@ -97,9 +97,9 @@ namespace ClickTap.Entities
             {
                 Name = Name,
                 Tip = Tip?.ToSerializable(identifierToPlugin),
-                TipActivationThreshold = Tip?.ActivationThreshold ?? 1,
+                TipActivationThreshold = TipActivationThreshold,
                 Eraser = Eraser?.ToSerializable(identifierToPlugin),
-                EraserActivationThreshold = Eraser?.ActivationThreshold ?? 1,
+                EraserActivationThreshold = EraserActivationThreshold,
                 PenButtons = PenButtons.Select(penButton => penButton?.ToSerializable(identifierToPlugin)).ToArray(),
                 AuxButtons = AuxButtons.Select(auxButton => auxButton?.ToSerializable(identifierToPlugin)).ToArray(),
                 MouseButtons = MouseButtons.Select(mouseButton => mouseButton?.ToSerializable(identifierToPlugin)).ToArray(),

@@ -25,7 +25,13 @@ namespace ClickTap.Lib.Entities.Bindable
         public Tthreshold? Tip { get; set; }
 
         [JsonProperty]
+        public float TipActivationThreshold { get; set; }
+
+        [JsonProperty]
         public Tthreshold? Eraser { get; set; }
+
+        [JsonProperty]
+        public float EraserActivationThreshold { get; set; }
 
         [JsonProperty]
         public TState?[] PenButtons { get; set; } = Array.Empty<TState>();
@@ -49,7 +55,9 @@ namespace ClickTap.Lib.Entities.Bindable
         public void Clear()
         {
             Tip = null!;
+            TipActivationThreshold = 1;
             Eraser = null!;
+            EraserActivationThreshold = 1;
             Array.Fill(PenButtons, null);
             Array.Fill(AuxButtons, null);
             Array.Fill(MouseButtons, null);
