@@ -1,12 +1,11 @@
 using System.Reflection;
-using ClickTap.Lib.Entities.Serializable;
 using OpenTabletDriver.Desktop.Reflection;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
 using ClickTap.Lib.Bindings;
-using OpenTabletDriver.Plugin.Attributes;
-using ClickTap.Lib.Extensions;
 using Newtonsoft.Json;
+using OpenTabletDriver.External.Common.Serializables;
+using ClickTap.Extensions;
 
 namespace ClickTap.Bindings
 {
@@ -14,9 +13,8 @@ namespace ClickTap.Bindings
     {
         public BulletproofBinding() { }
 
-        public BulletproofBinding(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin,
-                                  TabletReference? tablet = null, IServiceManager? provider = null)
-            : base(binding, identifierToPlugin)
+        public BulletproofBinding(SerializablePluginSettingsStore store, TabletReference? tablet = null, IServiceManager? provider = null)
+            : base(store, null!)
         {
             Tablet = tablet;
             Provider = provider;
@@ -44,62 +42,14 @@ namespace ClickTap.Bindings
                 stateBinding.Release(Tablet, report);
         }
 
-        public override SerializableBinding ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)
+        public override SerializablePluginSettingsStore? ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin)
         {
-            if (Store == null)
-                return null!;
-
-            var pluginKeyPair = identifierToPlugin.FirstOrDefault(x => x.Value == Store.GetTypeInfo());
-
-            var identifier = pluginKeyPair.Key;
-            var plugin = pluginKeyPair.Value;
-            string? value;
-
-            if (Store.Settings.Count == 1)
-                value = Store.Settings[0].GetValue<string?>();
-            else
-            {
-                var valueProperty = plugin.FindPropertyWithAttribute<PropertyAttribute>();
-                var validatedProperty = plugin.FindPropertyWithAttribute<PropertyValidatedAttribute>();
-
-                if (valueProperty == null || validatedProperty == null)
-                    return null!;
-
-                // surely they are the same property
-                if (valueProperty != validatedProperty)
-                    return null!;
-
-                value = Store.Settings.FirstOrDefault(x => x.Property == valueProperty.Name)?.GetValue<string?>();
-            }
-
-            return new SerializableBinding()
-            {
-                Identifier = identifier,
-                Value = value
-            };
+            return Store?.ToSerializable();
         }
 
-        public override void FromSerializable(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin)
+        public override void FromSerializable(SerializablePluginSettingsStore store, Dictionary<int, TypeInfo> identifierToPlugin)
         {
-            // The plugin might not be installed anymore or isn't loaded 
-            if (identifierToPlugin.TryGetValue(binding.Identifier, out var typeInfo) == false)
-                return;
-
-            var store = new PluginSettingStore(typeInfo);
-
-            // At first, i only fetched the property with a PropertyValidatedAttribute
-            var valueProperty = typeInfo?.FindPropertyWithAttribute<PropertyAttribute>();
-            var validatedProperty = typeInfo?.FindPropertyWithAttribute<PropertyValidatedAttribute>();
-
-            // TODO: Plugin without PropertyValidatedAttribute should be supported
-            if (valueProperty == null || validatedProperty == null)
-                return;
-
-            // TODO: When multiple properties are supported in OpenTabletDriver.External, we need to feed all settings
-            store.Settings.Single(s => s.Property == valueProperty.Name).SetValue(binding.Value);
-
-            // Only set the store when it's valid
-            Store = store;
+            Store = store.FromSerializable();
         }
     }
 }

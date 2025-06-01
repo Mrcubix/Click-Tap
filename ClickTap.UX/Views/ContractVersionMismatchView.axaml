@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:ClickTap.UX.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="ClickTap.UX.Views.ContractVersionMismatchView"
+             x:DataType="vm:ContractVersionMismatchViewModel">
+
+  <Grid Grid.RowDefinitions="Auto, 16, Auto, 16, Auto" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Text="Please Update Click &amp; Tap using the Plugin Manager" FontSize="16" FontWeight="Bold" Grid.Row="0" HorizontalAlignment="Center"/>
+    <TextBlock Text="A contract version mismatch has been detected, this application cannot proceed unless you update Click &amp; Tap." FontSize="12" 
+               Grid.Row="2" HorizontalAlignment="Center"/>
+    <TextBlock Text="You can do that by first fetching the latest version of the plugin from the latest Github Release, then Installing it according to the steps in the README." FontSize="12" 
+               Grid.Row="4" HorizontalAlignment="Center"/>
+  </Grid>
+
+</UserControl>
