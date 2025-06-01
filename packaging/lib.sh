@@ -13,7 +13,7 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 declare -g OUTPUT="build/packages"
 
 PACKAGE_NAME="ClickTap"
-PACKAGE_LNAME="clicktap"
+PACKAGE_LNAME="ClickTap.UX"
 PACKAGE_VERSION="0.9.3"
 
 ### Automatically handle errors and exit

@@ -67,12 +67,12 @@ namespace ClickTap.Lib
                 }
                 catch(Exception e)
                 {
-                    Log.Write("Touch Gestures Settings Loader", $"Failed to load settings from {path}: {e}", LogLevel.Error);
+                    Log.Write("Click & Tap Settings Loader", $"Failed to load settings from {path}: {e}", LogLevel.Error);
                 }
             }
             else
             {
-                Log.Write("Touch Gestures Settings Loader", $"Failed to load settings from {path}: file does not exist", LogLevel.Error);
+                Log.Write("Click & Tap Settings Loader", $"Failed to load settings from {path}: file does not exist", LogLevel.Error);
             }
 
             return false;

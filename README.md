@@ -84,6 +84,8 @@ THIS ALSO MEANS THAT MULTI-KEY BINDINGS WILL NOT WORK, unless you copy the setti
 2. The implementation for both the UX & the plugin is still fragile, and might be prone to breaking, if such things occur, 
 Open an Issue with OTD's diagnostics (Help > Export Diagnostics). & Stacktrace potentially obtained from The event viewer on Windows, or your terminal on Linux
 
+3. I'm unable to test MacOS builds due to not having an Apple device or a VM running MacOS, and for a reason i'm currently unable to figure out, the app will not run.
+
 ## Packaging
 
 You may run any of the packaging scripts from the root of the repo.

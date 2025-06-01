@@ -35,9 +35,20 @@ public partial class ThresholdBindingDisplayViewModel : StateBindingDisplayViewM
 
     #endregion
 
+    #region Methods
+
+    public override SerializableBinding? ToSerializableBinding()
+    {
+        if (PluginProperty == null || PluginProperty.Value == null || PluginProperty.Identifier == -1) return null;
+        
+        return new SerializableThresholdBinding(PluginProperty.Value, PluginProperty.Identifier, ActivationThreshold);
+    }
+
+    #endregion
+
     #region Event Handlers
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    protected override void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         // We should avoid sending an update to the daemon too frequently elsewhere
         if (e.PropertyName == nameof(ActivationThreshold))
@@ -45,6 +56,8 @@ public partial class ThresholdBindingDisplayViewModel : StateBindingDisplayViewM
             var args = new BindingsChangedArgs(PluginProperty, PluginProperty, this);
             OnBindingChanged(this, args);
         }
+
+        base.OnPropertyChanged(sender, e);
     }
 
     #endregion

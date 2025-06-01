@@ -177,7 +177,7 @@ do
     #Build the plugin, exit on failure
     if ! dotnet publish "ClickTap$suffix" -c Release -p:noWarn='"NETSDK1138;VSTHRD200"' -o temp/plugin/$version ;
     then
-        echo "Failed to build Touch-Gestures for $version"
+        echo "Failed to build Click & Tap for $version"
         exit 1
     fi
 
