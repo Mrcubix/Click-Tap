@@ -1,0 +1,67 @@
+{
+  "Version": 2,
+  "Profiles": [
+    {
+      "Name": "Wacom PTK-640",
+      "Tip": {
+        "Store": {
+          "Path": "OpenTabletDriver.Desktop.Binding.MouseBinding",
+          "Settings": [
+            {
+              "Property": "Button",
+              "Value": "Left",
+              "HasValue": true
+            }
+          ],
+          "Enable": true
+        },
+        "ActivationThreshold": 1.0
+      },
+      "TipActivationThreshold": 1.0,
+      "Eraser": null,
+      "EraserActivationThreshold": 1.0,
+      "PenButtons": [
+        {
+          "Store": {
+            "Path": "OpenTabletDriver.Desktop.Binding.MouseBinding",
+            "Settings": [
+              {
+                "Property": "Button",
+                "Value": "Right",
+                "HasValue": true
+              }
+            ],
+            "Enable": true
+          }
+        },
+        {
+          "Store": {
+            "Path": "OpenTabletDriver.Desktop.Binding.MouseBinding",
+            "Settings": [
+              {
+                "Property": "Button",
+                "Value": "Middle",
+                "HasValue": true
+              }
+            ],
+            "Enable": true
+          }
+        }
+      ],
+      "AuxButtons": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "MouseButtons": [],
+      "MouseScrollUp": null,
+      "MouseScrollDown": null
+    }
+  ]
+}
