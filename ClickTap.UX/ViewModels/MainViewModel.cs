@@ -19,6 +19,12 @@ namespace ClickTap.UX.ViewModels;
 
 public partial class MainViewModel : NavigableViewModel
 {
+    #region Constants
+
+    public const int SUPPORTED_CONTRACT_VERSION = 2;
+
+    #endregion
+
     #region Fields
 
     private CancellationTokenSource _reconnectionTokenSource = new();
@@ -26,6 +32,7 @@ public partial class MainViewModel : NavigableViewModel
     private SerializableSettings? _settings;
 
     private readonly ConnectionViewModel<IClickTapDaemon> _connectionScreenViewModel;
+    private readonly ContractVersionMismatchViewModel _contractVersionMismatchViewModel = new();
 
     #endregion
 
@@ -111,6 +118,23 @@ public partial class MainViewModel : NavigableViewModel
         {
             HandleException(e);
         }
+    }
+
+    private async Task<int?> TryGetContractVersion()
+    {
+        if (!_client.IsConnected)
+            return null;
+
+        try
+        {
+            return await _client.Instance.GetContractVersion();
+        }
+        catch (Exception e)
+        {
+            HandleException(e);
+        }
+
+        return null;
     }
 
     private async Task<List<SerializablePlugin>?> FetchPluginsAsync()
@@ -213,6 +237,16 @@ public partial class MainViewModel : NavigableViewModel
 
     private async Task OnClientAttached(object? sender, EventArgs e)
     {
+        // Check if the contract version is correct before continuing
+        var version = await TryGetContractVersion();
+
+        if (version < SUPPORTED_CONTRACT_VERSION)
+        {
+            IsReady = false;
+            NextViewModel = _contractVersionMismatchViewModel;
+            return;
+        }
+
         _client.Instance.TabletsChanged += OnTabletsChanged;
 
         var tempPlugins = await FetchPluginsAsync();
@@ -245,10 +279,6 @@ public partial class MainViewModel : NavigableViewModel
         if (tempSettings != null)
         {
             _settings = tempSettings;
-
-            // TODO : Display Screen about plugin version being outdated
-            if (_settings.Version < 2)
-                return;
 
             // Always set the settings first
             Dispatcher.UIThread.Post(() => OnSettingsChanged(_settings));

@@ -26,6 +26,8 @@ namespace ClickTap.Lib
 
         public const string PLUGIN_NAME = "Click & Tap Daemon";
 
+        public const int CONTRACT_VERSION = 2;
+
         protected readonly string _settingsPath = Path.Combine(OpenTabletDriver.Desktop.AppInfo.Current.AppDataDirectory, "Click-Tap.json");
 
         protected readonly JsonSerializerSettings _serializerSettings = new()
@@ -332,6 +334,14 @@ namespace ClickTap.Lib
             Log.Write(PLUGIN_NAME, "Checking if tablet is connected...");
 
             return Task.FromResult(_tablets.Any());
+        }
+
+        /// <inheritdoc />
+        public virtual Task<int> GetContractVersion()
+        {
+            Log.Write(PLUGIN_NAME, "Getting contract version...");
+
+            return Task.FromResult(CONTRACT_VERSION);
         }
 
         /// <inheritdoc />
