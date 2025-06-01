@@ -45,6 +45,11 @@ Don't forget to Apply, then save if you want changes to be persistent.
 
 If you want to rollback to the settings you had before applying, you may just restart OpenTabletDriver.
 
+### Configuring Bindings (If the UX doesn't work)
+
+You may take a look at [/docs/examples/](/docs/examples/) for some examples settings file.
+The way Bindings are formatted is the exact same as in OpenTabletDriver, with some differences for the rest.
+
 ## Known Issues
 
 1. In 0.6.x, Plugins with extra settings like my own `Scroll Binding` bindings, don't have any way to be configured from inside the app.
