@@ -20,7 +20,6 @@ namespace ClickTap.Lib.Bindings
         ///   The threshold at which the binding should be activated.<br/>
         ///   Usually represented by a slider in the UI.
         /// </summary>
-        [JsonProperty]
         public float ActivationThreshold { set; get; }
 
         public virtual void Invoke(IDeviceReport report, float value)

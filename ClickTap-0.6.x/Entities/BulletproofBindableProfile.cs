@@ -11,8 +11,17 @@ namespace ClickTap.Entities
     {
         public override void ConstructBindings(SharedTabletReference? tablet = null)
         {
-            Tip?.Construct();
-            Eraser?.Construct();
+            if (Tip != null)
+            {
+                Tip.ActivationThreshold = TipActivationThreshold;
+                Tip.Construct();
+            }
+            
+            if (Eraser != null)
+            {
+                Eraser.ActivationThreshold = EraserActivationThreshold;
+                Eraser?.Construct();
+            }
 
             foreach (var penButton in PenButtons)
                 penButton?.Construct();
