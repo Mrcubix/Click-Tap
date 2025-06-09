@@ -333,7 +333,7 @@ namespace ClickTap.Lib
         {
             Log.Write(PLUGIN_NAME, "Checking if tablet is connected...");
 
-            return Task.FromResult(_tablets.Any());
+            return Task.FromResult(_tablets.Count > 0);
         }
 
         /// <inheritdoc />
@@ -347,7 +347,7 @@ namespace ClickTap.Lib
         /// <inheritdoc />
         public virtual Task<IEnumerable<SharedTabletReference>> GetTablets()
         {
-            if (!_tablets.Any())
+            if (_tablets.Count == 0)
                 return Task.FromResult(Array.Empty<SharedTabletReference>().AsEnumerable());
 
             Log.Write(PLUGIN_NAME, "Getting tablets...");
