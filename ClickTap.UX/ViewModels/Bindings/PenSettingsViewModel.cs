@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClickTap.Lib.Entities.Serializable;
@@ -13,10 +14,10 @@ namespace ClickTap.UX.ViewModels.Bindings
         #region Bindings
 
         [ObservableProperty]
-        private ThresholdBindingDisplayViewModel _tipBindingDisplay = new(new SerializableThresholdBinding(string.Empty, 0, 0));
+        private ThresholdBindingDisplayViewModel _tipBindingDisplay = new(null!, 1);
 
         [ObservableProperty]
-        private ThresholdBindingDisplayViewModel _eraserBindingDisplay = new(new SerializableThresholdBinding(string.Empty, 0, 0));
+        private ThresholdBindingDisplayViewModel _eraserBindingDisplay = new(null!, 1);
 
         #endregion
 
@@ -39,17 +40,15 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             var profile = overview.Profile;
 
-            // Avoid some double invokation shenanigans
-            UnsubscribeFromEvents();   
             Bindings.Clear();
 
             for (var i = 0; i < profile.PenButtons.Length; i++)
             {
-                SerializableBinding? settings = profile.PenButtons[i];
+                SerializablePluginSettingsStore? store = profile.PenButtons[i];
 
-                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                var bindingDisplay = new StateBindingDisplayViewModel(store!)
                 {
-                    Content = GetFriendlyContentFromProperty(settings, plugins),
+                    Content = store?.GetHumanReadableString(),
                     Description = GetDescriptionForIndex(i)
                 };
 
@@ -57,57 +56,32 @@ namespace ClickTap.UX.ViewModels.Bindings
             }
 
             // Tip
-            TipBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Tip!)
+            TipBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Tip!, profile.TipActivationThreshold)
             {
-                Content = GetFriendlyContentFromProperty(profile.Tip, plugins),
+                Content = profile.Tip?.GetHumanReadableString(),
                 Description = "Tip Binding",
                 ThresholdDescription = "Tip Threshold"
             };
 
             // Eraser
-            EraserBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Eraser!)
+            EraserBindingDisplay = new ThresholdBindingDisplayViewModel(profile.Eraser!, profile.EraserActivationThreshold)
             {
-                Content = GetFriendlyContentFromProperty(profile.Eraser, plugins),
+                Content = profile.Eraser?.GetHumanReadableString(),
                 Description = "Eraser Binding",
                 ThresholdDescription = "Eraser Threshold"
             };
 
-            SubscribeToEvents();
-
             IsEnabled = true;
         }
 
-        // TODO: Get rid of this
         public override void UpdateProfile(SerializableProfile profile)
         {
-            profile.PenButtons = Bindings.Select(binding => binding.ToSerializableBinding()).ToArray();
-            profile.Tip = TipBindingDisplay.ToSerializableBinding() as SerializableThresholdBinding;
-            profile.Eraser = EraserBindingDisplay.ToSerializableBinding() as SerializableThresholdBinding;
+            profile.PenButtons = Bindings.Select(binding => binding.Store).ToArray();
+            profile.Tip = TipBindingDisplay.Store;
+            profile.TipActivationThreshold = MathF.Round(TipBindingDisplay.ActivationThreshold);
+            profile.Eraser = EraserBindingDisplay.Store;
+            profile.EraserActivationThreshold = MathF.Round(EraserBindingDisplay.ActivationThreshold);
         }
-
-        #region Event Related
-
-        protected override void SubscribeToEvents()
-        {
-            // Bindings
-            base.SubscribeToEvents();
-
-            // Tip & Eraser
-            TipBindingDisplay.BindingChanged += OnBindingsChanged;
-            EraserBindingDisplay.BindingChanged += OnBindingsChanged;
-        }
-
-        protected override void UnsubscribeFromEvents()
-        {
-            // Bindings
-            base.UnsubscribeFromEvents();
-
-            // Tip & Eraser
-            TipBindingDisplay.BindingChanged -= OnBindingsChanged;
-            EraserBindingDisplay.BindingChanged -= OnBindingsChanged;
-        }
-
-        #endregion
 
         #endregion
     }

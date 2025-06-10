@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using ClickTap.Lib.Entities.Serializable;
-using ClickTap.UX.Events;
 using ClickTap.UX.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenTabletDriver.External.Common.Serializables;
@@ -12,12 +10,6 @@ namespace ClickTap.UX.ViewModels.Bindings
 {
     public partial class AuxiliarySettingsViewModel : NavigableViewModel
     {
-        #region Events
-
-        public event EventHandler<BindingsChangedArgs>? BindingsChanged;
-
-        #endregion
-
         #region Fields
 
         [ObservableProperty]
@@ -47,24 +39,20 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             var profile = overview.Profile;
 
-            // Avoid some double invokation shenanigans
-            UnsubscribeFromEvents();
             Bindings.Clear();
 
             for (var i = 0; i < profile.AuxButtons.Length; i++)
             {
-                SerializableBinding? settings = profile.AuxButtons[i];
+                SerializablePluginSettingsStore? store = profile.AuxButtons[i];
 
-                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                var bindingDisplay = new StateBindingDisplayViewModel(store!)
                 {
-                    Description = GetDescriptionForIndex(i),
-                    Content = GetFriendlyContentFromProperty(settings, plugins)
+                    Content = store?.GetHumanReadableString(),
+                    Description = GetDescriptionForIndex(i)
                 };
 
                 Bindings.Add(bindingDisplay);
             }
-
-            SubscribeToEvents();
 
             IsEnabled = true;
         }
@@ -74,53 +62,9 @@ namespace ClickTap.UX.ViewModels.Bindings
             return $"{Prefix} {index + 1}";
         }
 
-        // TODO: Get rid of this
         public virtual void UpdateProfile(SerializableProfile profile)
         {
-            profile.AuxButtons = Bindings.Select(binding => (SerializableBinding?)binding.PluginProperty).ToArray();
-        }
-
-        #region Event Related
-
-        protected virtual void SubscribeToEvents()
-        {
-            foreach (var binding in Bindings)
-                binding.BindingChanged += OnBindingsChanged;
-        }
-
-        protected virtual void UnsubscribeFromEvents()
-        {
-            foreach (var binding in Bindings)
-                binding.BindingChanged -= OnBindingsChanged;
-        }
-
-        protected void OnBindingsChanged(object? sender, BindingsChangedArgs e)
-        {
-            BindingsChanged?.Invoke(this, e);
-        }
-
-        #endregion
-
-        #endregion
-
-        #region Static Methods
-
-        public static string GetFriendlyContentFromProperty(SerializablePluginSettings? property, IList<SerializablePlugin> plugins)
-        {
-            if (property == null || property.Identifier == 0)
-                return "";
-
-            var pluginName = GetPluginNameFromIdentifier(property.Identifier, plugins);
-
-            return $"{pluginName} : {property.Value}";
-        }
-
-        private static string? GetPluginNameFromIdentifier(int identifier, IList<SerializablePlugin>? Plugins)
-        {
-            if (Plugins == null)
-                return null;
-
-            return Plugins.FirstOrDefault(x => x.Identifier == identifier)?.PluginName ?? "Unknown";
+            profile.AuxButtons = Bindings.Select(binding => binding.Store).ToArray();
         }
 
         #endregion

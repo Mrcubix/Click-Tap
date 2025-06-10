@@ -1,13 +1,27 @@
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using OpenTabletDriver.External.Common.Enums;
 using OpenTabletDriver.External.Common.Serializables;
+using OpenTabletDriver.External.Common.Serializables.Properties;
 
 namespace ClickTap.Lib.Entities.Serializable
 {
-    public class SerializableBinding : SerializablePluginSettings
+    public class SerializableBinding : SerializablePlugin
     {
-        public SerializableBinding() : base() { }
+        [JsonConstructor]
+        public SerializableBinding() : base() 
+        {
+            Type = PluginType.Binding;
+        }
 
-        public SerializableBinding(string value, int identifier) : base(value, identifier) { }
-
-        public SerializableBinding(SerializablePluginSettings pluginProperty) : base(pluginProperty.Value!, pluginProperty.Identifier) { }
+        public SerializableBinding(string? pluginName, string? fullName, int identifier, IEnumerable<SerializableProperty> properties)
+        {
+            PluginName = pluginName;
+            FullName = fullName;
+            Identifier = identifier;
+            Properties = new(properties);
+        }
+    
+        public bool IsThresholdBinding { get; init; } = false;
     }
 }

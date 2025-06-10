@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
-using ClickTap.Lib.Entities.Serializable;
 using Newtonsoft.Json;
+using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin.Tablet;
 
 namespace ClickTap.Lib.Bindings
@@ -12,8 +11,8 @@ namespace ClickTap.Lib.Bindings
     {
         public Binding() {}
 
-        public Binding(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin)
-            => FromSerializable(binding, identifierToPlugin);
+        public Binding(SerializablePluginSettingsStore store, Dictionary<int, TypeInfo> identifierToPlugin)
+            => FromSerializable(store, identifierToPlugin);
 
         public bool State { protected set; get; }
 
@@ -34,8 +33,8 @@ namespace ClickTap.Lib.Bindings
 
         public abstract void Construct();
 
-        public abstract SerializableBinding ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin);
+        public abstract SerializablePluginSettingsStore? ToSerializable(Dictionary<int, TypeInfo> identifierToPlugin);
 
-        public abstract void FromSerializable(SerializableBinding binding, Dictionary<int, TypeInfo> identifierToPlugin);
+        public abstract void FromSerializable(SerializablePluginSettingsStore store, Dictionary<int, TypeInfo> identifierToPlugin);
     }
 }

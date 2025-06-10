@@ -1,15 +1,13 @@
-using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Threading;
-using ClickTap.Lib.Entities.Serializable;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using ClickTap.UX.ViewModels;
-using ClickTap.UX.ViewModels.Bindings;
 using OpenTabletDriver.External.Avalonia.Dialogs;
 using OpenTabletDriver.External.Avalonia.ViewModels;
 using OpenTabletDriver.External.Avalonia.Views;
+using OpenTabletDriver.External.Common.Enums;
 using OpenTabletDriver.External.Common.Serializables;
 
 namespace ClickTap.UX.Views;
@@ -17,7 +15,6 @@ namespace ClickTap.UX.Views;
 public partial class MainWindow : AppMainWindow
 {
     private static readonly BindingEditorDialogViewModel _bindingEditorDialogViewModel = new();
-    private static readonly AdvancedBindingEditorDialogViewModel _advancedBindingEditorDialogViewModel = new();
 
     private bool _isEditorDialogOpen = false;
 
@@ -42,19 +39,28 @@ public partial class MainWindow : AppMainWindow
         {
             _isEditorDialogOpen = true;
 
-            // Now we setup the dialog
+            // Now we set the view model's properties
 
+            var plugins = vm.BindingsOverviewViewModel.Plugins;
+
+            var bindingPlugins = plugins.Where(p => p.Type == PluginType.Binding).ToList();
+            var selectedPlugin = bindingPlugins.FirstOrDefault(p => p.Identifier == e.Store?.Identifier);
+
+            _bindingEditorDialogViewModel.Store = e.Store;
+
+            // Now we setup the dialog
             var dialog = new BindingEditorDialog()
             {
-                Plugins = vm.BindingsOverviewViewModel.Plugins,
+                Plugins = plugins,
                 DataContext = _bindingEditorDialogViewModel
             };
 
-            // Now we show the dialog
+#if DEBUG
+            dialog.AttachDevTools();
+#endif
 
-            var res = await dialog.ShowDialog<SerializablePluginSettings>(this);
-
-            HandleBindingEditorResult(res, e);
+            // Now we show & handle the dialog
+            await HandleBindingEditorDialog(dialog, e);
         }
     }
 
@@ -64,74 +70,50 @@ public partial class MainWindow : AppMainWindow
         {
             _isEditorDialogOpen = true;
 
+            // Now we set the view model's properties
+
             var plugins = vm.BindingsOverviewViewModel.Plugins;
 
-            // Fetch some data from the plugins
-
-            var types = plugins.Select(p => p.PluginName ?? p.FullName ?? "Unknown").ToList();
-
-            var currentPlugin = plugins.FirstOrDefault(p => p.Identifier == e.PluginProperty?.Identifier);
-            var selectedType = currentPlugin?.PluginName ?? currentPlugin?.FullName ?? "Unknown";
-
-            var validProperties = currentPlugin?.ValidProperties ?? Array.Empty<string>();
-            var selectedProperty = e.PluginProperty?.Value ?? "";
+            var bindingPlugins = plugins.Where(p => p.Type == PluginType.Binding).ToList();
+            var selectedPlugin = bindingPlugins.FirstOrDefault(p => p.Identifier == e.Store?.Identifier);
+            
+            var settingsStoreEditor = new PluginSettingStoreEditorViewModel()
+            {
+                Properties = selectedPlugin?.Properties ?? [],
+                Store = e.Store
+            };
 
             // Now we set the view model's properties
 
-            _advancedBindingEditorDialogViewModel.Types = new ObservableCollection<string>(types);
-            _advancedBindingEditorDialogViewModel.SelectedType = selectedType;
-            _advancedBindingEditorDialogViewModel.ValidProperties = new ObservableCollection<string>(validProperties);
-            _advancedBindingEditorDialogViewModel.SelectedProperty = selectedProperty;
+            var advancedBindingEditorDialogViewModel = new AdvancedBindingEditorDialogViewModel([.. bindingPlugins], settingsStoreEditor)
+            {
+                SelectedBindingType = selectedPlugin,
+            };
 
             // Now we setup the dialog
-
             var dialog = new AdvancedBindingEditorDialog()
             {
-                DataContext = _advancedBindingEditorDialogViewModel,
+                DataContext = advancedBindingEditorDialogViewModel,
                 Plugins = plugins
             };
 
-            // Now we show the dialog
-            var res = await dialog.ShowDialog<SerializablePluginSettings>(this);
+#if DEBUG
+            dialog.AttachDevTools();
+#endif
 
-            HandleBindingEditorResult(res, e);
+            // Now we show & handle the dialog
+            await HandleBindingEditorDialog(dialog, e);
         }
     }
 
-    private void HandleBindingEditorResult(SerializablePluginSettings result, BindingDisplayViewModel e)
+    private async Task HandleBindingEditorDialog(Window dialog, BindingDisplayViewModel e)
     {
-        if (DataContext is MainViewModel vm)
-        {
-            _isEditorDialogOpen = false;
+        var res = await dialog.ShowDialog<SerializablePluginSettingsStore>(this);
 
-            // We handle the result
+        _isEditorDialogOpen = false;
 
-            // The dialog was closed or the cancel button was pressed
-            if (result == null)
-                return;
-
-            // The user selected "Clear"
-            if (result.Identifier == -1 || result.Value == "None")
-            {
-                e.PluginProperty = null;
-                e.Content = "";
-            }
-            else
-            {
-                // External doesn't support generic types so we need to generate the appropriate serializable
-                e.PluginProperty = ConvertToCorrectSerializable(e, result);
-                e.Content = AuxiliarySettingsViewModel.GetFriendlyContentFromProperty(result, vm.BindingsOverviewViewModel.Plugins);
-            }
-        }
-    }
-
-    private static SerializablePluginSettings ConvertToCorrectSerializable(BindingDisplayViewModel display, SerializablePluginSettings result)
-    {
-        return display switch
-        {
-            ThresholdBindingDisplayViewModel thresholdDisplay => new SerializableThresholdBinding(result.Value!, result.Identifier, thresholdDisplay.ActivationThreshold),
-            StateBindingDisplayViewModel => new SerializableBinding(result.Value!, result.Identifier),
-            _ => result
-        };
+        // We handle the result
+        e.Store = res;
+        e.Content = res?.GetHumanReadableString();
     }
 }

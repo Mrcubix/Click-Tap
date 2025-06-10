@@ -90,7 +90,7 @@ copy_pixmap_assets() {
   
   # cleanup old pixmap assets
   if [ -d "${output_folder}" ]; then
-    rm -rf "${output_folder}"/*
+    rm -rf "${output_folder:?}"/*
   fi
 
   cp "${REPO_ROOT}/ClickTap.UX/Assets"/* "${output_folder}"
