@@ -1,3 +1,3 @@
 namespace ClickTap.UX.ViewModels;
 
-public class ContractVersionMismatchViewModel : NavigableViewModel {}
+public class ErrorViewModel : NavigableViewModel {}

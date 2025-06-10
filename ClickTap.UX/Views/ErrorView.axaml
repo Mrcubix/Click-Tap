@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:ClickTap.UX.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="ClickTap.UX.Views.ContractVersionMismatchView"
-             x:DataType="vm:ContractVersionMismatchViewModel">
+             x:Class="ClickTap.UX.Views.ErrorView"
+             x:DataType="vm:ErrorViewModel">
 
   <Grid Grid.RowDefinitions="Auto, 16, Auto, 16, Auto" HorizontalAlignment="Center" VerticalAlignment="Center">
     <TextBlock Text="Please Update Click &amp; Tap using the Plugin Manager" FontSize="16" FontWeight="Bold" Grid.Row="0" HorizontalAlignment="Center"/>

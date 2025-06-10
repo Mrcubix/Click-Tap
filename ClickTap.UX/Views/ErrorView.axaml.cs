@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace ClickTap.UX.Views;
 
-public partial class ContractVersionMismatchView : UserControl
+public partial class ErrorView : UserControl
 {
-    public ContractVersionMismatchView()
+    public ErrorView()
     {
         InitializeComponent();
     }
