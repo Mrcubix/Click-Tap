@@ -32,7 +32,7 @@ public partial class MainViewModel : NavigableViewModel
     private SerializableSettings? _settings;
 
     private readonly ConnectionViewModel<IClickTapDaemon> _connectionScreenViewModel;
-    private readonly ContractVersionMismatchViewModel _contractVersionMismatchViewModel = new();
+    private readonly ErrorViewModel _errorViewModel = new();
 
     #endregion
 
@@ -243,7 +243,7 @@ public partial class MainViewModel : NavigableViewModel
         if (version < SUPPORTED_CONTRACT_VERSION)
         {
             IsReady = false;
-            NextViewModel = _contractVersionMismatchViewModel;
+            NextViewModel = _errorViewModel;
             return;
         }
 
