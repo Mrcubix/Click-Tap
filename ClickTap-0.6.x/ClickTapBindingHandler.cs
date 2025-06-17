@@ -141,6 +141,13 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
 
     #region Properties
 
+    [BooleanProperty("Allow Tip to Stay Pressed", ""),
+     DefaultPropertyValue(false),
+     ToolTip("Click & Tap:\n\n" +
+             "Allow the tip to stay pressed when a Click & Tap button is pressed.\n\n" +
+             "Default: false")]
+    public bool AllowTipStayPressed { set; get; }
+
     [TabletReference]
     public TabletReference? Tablet { get; set; }
 
@@ -179,7 +186,7 @@ public class ClickTapBindingHandler : IPositionedPipelineElement<IDeviceReport>,
             HandleAuxiliaryReport(auxReport);
 
         // Handle the tip or eraser when used LAST
-        _currentTipBinding?.Invoke(report, _thresholdReached && _awaitingRelease == false);
+        _currentTipBinding?.Invoke(report, _thresholdReached && (_awaitingRelease == false || AllowTipStayPressed));
     }
 
     private void HandleTabletReport(PenSpecifications pen, ITabletReport report)
