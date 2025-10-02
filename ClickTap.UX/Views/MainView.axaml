@@ -26,6 +26,10 @@
         <DataTemplate DataType="vm:ConnectionViewModel">
           <views:ConnectionView />
         </DataTemplate>
+        <!-- Contract Version Mismatch Screen -->
+        <DataTemplate DataType="vm:ErrorViewModel">
+          <views:ErrorView />
+        </DataTemplate>
         <!-- Bindings Overview -->
         <DataTemplate DataType="bindings-vm:BindingsOverviewViewModel">
           <bindings-views:BindingsOverview />

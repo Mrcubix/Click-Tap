@@ -1,22 +1,22 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
+using OpenTabletDriver.External.Common.Serializables.Properties;
 
 namespace ClickTap.Lib.Entities.Serializable.Bindings
 {
     public class SerializableThresholdBinding : SerializableBinding
     {
-        public SerializableThresholdBinding() : base() { }
-
-        public SerializableThresholdBinding(string value, int identifier, float activationThreshold) : base(value, identifier)
+        public SerializableThresholdBinding() : base()
         {
-            ActivationThreshold = activationThreshold;
+            IsThresholdBinding = true;
         }
 
-        public SerializableThresholdBinding(SerializableThresholdPluginSettings pluginProperty) : base(pluginProperty) 
-        { 
-            ActivationThreshold = pluginProperty.ActivationThreshold;
+        public SerializableThresholdBinding(string? pluginName, string? fullName, int identifier, IEnumerable<SerializableProperty> properties)
+        {
+            PluginName = pluginName;
+            FullName = fullName;
+            Identifier = identifier;
+            Properties = new(properties);
         }
-
-        [JsonProperty]
-        public float ActivationThreshold { get; set; }
     }
 }

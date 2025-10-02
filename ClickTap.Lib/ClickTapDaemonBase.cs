@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -19,18 +18,15 @@ using ClickTap.Lib.Bindings;
 
 namespace ClickTap.Lib
 {
-    public class ClickTapDaemonBase<Tprofile, TState, Tthreshold> : IDisposable
-        where Tprofile : BindableProfile<TState, Tthreshold>, new()
-        where TState : Binding
-        where Tthreshold : ThresholdBinding
+    public class ClickTapDaemonBase : IDisposable
     {
-        protected static RpcServer<ClickTapDaemonBase<Tprofile, TState, Tthreshold>>? _rpcServer = null!;
-        public static ClickTapDaemonBase<Tprofile, TState, Tthreshold>? Instance { get; protected set; } = null!;
         public static event EventHandler? DaemonLoaded;
 
         #region Constants
 
         public const string PLUGIN_NAME = "Click & Tap Daemon";
+
+        public const int CONTRACT_VERSION = 2;
 
         protected readonly string _settingsPath = Path.Combine(OpenTabletDriver.Desktop.AppInfo.Current.AppDataDirectory, "Click-Tap.json");
 
@@ -52,6 +48,62 @@ namespace ClickTap.Lib
         protected List<SharedTabletReference> _tablets = new();
 
         #endregion
+
+        #region Events
+
+        public event EventHandler? Ready;
+        public event EventHandler<IEnumerable<SharedTabletReference>>? TabletsChanged;
+
+        #endregion
+
+        #region Properties
+
+        public Dictionary<int, TypeInfo> IdentifierToPluginConversion { get; private set; } = new();
+
+        public List<SerializablePlugin> Plugins { get; private set; } = new();
+
+        public bool IsReady { get; protected set; }
+
+        public bool HasErrored { get; protected set; }
+
+        #endregion
+
+        #region Methods
+
+        public virtual void OnReady() => Ready?.Invoke(this, EventArgs.Empty);
+
+        public virtual void OnTabletsChanged() => TabletsChanged?.Invoke(this, _tablets);
+
+        #endregion
+
+        #region Disposal
+
+        public virtual void Dispose()
+        {
+            _tablets.Clear();
+
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Static Events Trigger
+
+        protected static void OnDaemonLoaded(object? sender = null)
+        {
+            DaemonLoaded?.Invoke(sender, EventArgs.Empty);
+        }
+
+        #endregion
+    }
+
+    public class ClickTapDaemonBase<Tprofile, TState, Tthreshold> : ClickTapDaemonBase, IDisposable
+        where Tprofile : BindableProfile<TState, Tthreshold>, new()
+        where TState : Binding
+        where Tthreshold : ThresholdBinding
+    {
+        protected static RpcServer<ClickTapDaemonBase<Tprofile, TState, Tthreshold>>? _rpcServer = null!;
+        public static ClickTapDaemonBase<Tprofile, TState, Tthreshold>? Instance { get; protected set; } = null!;
 
         #region Initialization
 
@@ -85,12 +137,13 @@ namespace ClickTap.Lib
 
             // identify plugins
             IdentifyPlugins();
+            SerializePlugins();
 
             SettingsChanged?.Invoke(this, ClickTapSettings);
 
             IsReady = true;
-            Ready?.Invoke(this, null!);
-            DaemonLoaded?.Invoke(this, null!);
+            OnReady();
+            OnDaemonLoaded(this);
         }
 
         protected virtual void IdentifyPlugins()
@@ -115,13 +168,14 @@ namespace ClickTap.Lib
             }
         }
 
+        protected virtual void SerializePlugins()
+            => throw new NotImplementedException();
+
         #endregion
 
         #region Events
 
-        public event EventHandler? Ready;
         public event EventHandler<Settings<Tprofile, TState, Tthreshold>?>? SettingsChanged;
-        public event EventHandler<IEnumerable<SharedTabletReference>>? TabletsChanged;
 
         protected event EventHandler<SharedTabletReference>? TabletAdded;
         protected event EventHandler<SharedTabletReference>? TabletRemoved;
@@ -130,13 +184,7 @@ namespace ClickTap.Lib
 
         #region Properties
 
-        public Dictionary<int, TypeInfo> IdentifierToPluginConversion = new();
-
         public Settings<Tprofile, TState, Tthreshold>? ClickTapSettings { get; protected set; } = Settings<Tprofile, TState, Tthreshold>.Default;
-
-        public bool IsReady { get; protected set; }
-
-        public bool HasErrored { get; protected set; }
 
         #endregion
 
@@ -167,7 +215,7 @@ namespace ClickTap.Lib
             // Since a new tablet has been added, we need to build the bindings for it
             BuildProfileBindings(tablet);
 
-            TabletsChanged?.Invoke(this, _tablets);
+            OnTabletsChanged();
             TabletAdded?.Invoke(this, tablet);
         }
 
@@ -176,7 +224,7 @@ namespace ClickTap.Lib
             if (!_tablets.Remove(tablet))
                 return;
 
-            TabletsChanged?.Invoke(this, _tablets);
+            OnTabletsChanged();
             TabletRemoved?.Invoke(this, tablet);
         }
 
@@ -223,8 +271,13 @@ namespace ClickTap.Lib
 
             HasErrored = !Settings<Tprofile, TState, Tthreshold>.TryLoadFrom(path, out var temp);
 
-            if (!HasErrored)
-                ClickTapSettings = temp;
+            if (HasErrored || temp == null)
+                return;
+
+            ClickTapSettings = temp;
+
+            if (ClickTapSettings.Version == 1) // No major changes yet
+                ClickTapSettings.Version = 2;
         }
 
         private bool SaveSettingsCore()
@@ -248,14 +301,8 @@ namespace ClickTap.Lib
 
         #region Event Methods
 
-        protected virtual void OnReady(EventArgs e)
-            => Ready?.Invoke(this, e);
-
         protected virtual void OnSettingsChanged(Settings<Tprofile, TState, Tthreshold> settings)
             => SettingsChanged?.Invoke(this, settings);
-
-        protected virtual void OnTabletsChanged(IEnumerable<SharedTabletReference> tablets)
-            => TabletsChanged?.Invoke(this, tablets);
 
         protected virtual void OnTabletAdded(SharedTabletReference tablet)
             => TabletAdded?.Invoke(this, tablet);
@@ -275,24 +322,37 @@ namespace ClickTap.Lib
         /// </remarks>
         /// <returns>The available plugins.</returns>
         public virtual Task<List<SerializablePlugin>> GetPlugins() 
-            => throw new NotImplementedException();
+        {
+            Log.Write(PLUGIN_NAME, "Getting plugins...");
+
+            return Task.FromResult(Plugins);
+        }
 
         /// <inheritdoc />
         public virtual Task<bool> IsTabletConnected()
         {
             Log.Write(PLUGIN_NAME, "Checking if tablet is connected...");
 
-            return Task.FromResult(_tablets.Any());
+            return Task.FromResult(_tablets.Count > 0);
+        }
+
+        /// <inheritdoc />
+        public virtual Task<int> GetContractVersion()
+        {
+            Log.Write(PLUGIN_NAME, "Getting contract version...");
+
+            return Task.FromResult(CONTRACT_VERSION);
         }
 
         /// <inheritdoc />
         public virtual Task<IEnumerable<SharedTabletReference>> GetTablets()
         {
-            if (!_tablets.Any())
+            if (_tablets.Count == 0)
                 return Task.FromResult(Array.Empty<SharedTabletReference>().AsEnumerable());
 
             Log.Write(PLUGIN_NAME, "Getting tablets...");
 
+            // Conversion to base could potentially be avoided if we use a specific conerter for property serialization
             return Task.FromResult(_tablets.AsEnumerable());
         }
 
@@ -351,21 +411,10 @@ namespace ClickTap.Lib
 
         #region Disposal
 
-        public virtual void Dispose()
+        public override void Dispose()
         {
-            _tablets.Clear();
             _rpcServer?.Dispose();
-
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
-        #region Static Events Trigger
-
-        protected static void OnDaemonLoaded(object? sender = null)
-        {
-            DaemonLoaded?.Invoke(sender, EventArgs.Empty);
+            base.Dispose();
         }
 
         #endregion

@@ -18,6 +18,11 @@ namespace ClickTap.Lib.Contracts
         public Task<bool> IsTabletConnected();
 
         /// <summary>
+        ///   Returns the Contract version.
+        /// <summary>
+        public Task<int> GetContractVersion();
+
+        /// <summary>
         ///   Returns the connected tablets.
         /// </summary>
         public Task<IEnumerable<SharedTabletReference>> GetTablets();

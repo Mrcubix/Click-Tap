@@ -12,10 +12,10 @@ namespace ClickTap.UX.ViewModels.Bindings
         #region Bindings
 
         [ObservableProperty]
-        private StateBindingDisplayViewModel _mouseScrollUpBindingDisplay = new(new SerializableBinding(string.Empty, 0));
+        private StateBindingDisplayViewModel _mouseScrollUpBindingDisplay = new();
 
         [ObservableProperty]
-        private StateBindingDisplayViewModel _mouseScrollDownBindingDisplay = new(new SerializableBinding(string.Empty, 0));
+        private StateBindingDisplayViewModel _mouseScrollDownBindingDisplay = new();
 
         #endregion
 
@@ -38,17 +38,15 @@ namespace ClickTap.UX.ViewModels.Bindings
 
             var profile = overview.Profile;
 
-            // Avoid some double invokation shenanigans
-            UnsubscribeFromEvents();
             Bindings.Clear();
 
             for (var i = 0; i < profile.MouseButtons.Length; i++)
             {
-                SerializableBinding? settings = profile.MouseButtons[i];
+                SerializablePluginSettingsStore? store = profile.MouseButtons[i];
 
-                var bindingDisplay = new StateBindingDisplayViewModel(settings!)
+                var bindingDisplay = new StateBindingDisplayViewModel(store!)
                 {
-                    Content = GetFriendlyContentFromProperty(settings, plugins),
+                    Content = store?.GetHumanReadableString(),
                     Description = GetDescriptionForIndex(i)
                 };
 
@@ -58,17 +56,15 @@ namespace ClickTap.UX.ViewModels.Bindings
             // Scroll Wheel
             MouseScrollUpBindingDisplay = new StateBindingDisplayViewModel(profile.MouseScrollUp!);
             {
-                MouseScrollUpBindingDisplay.Content = GetFriendlyContentFromProperty(profile.MouseScrollUp!, plugins);
+                MouseScrollUpBindingDisplay.Content = profile.MouseScrollUp?.GetHumanReadableString();
                 MouseScrollUpBindingDisplay.Description = "Scroll Up";
             }
 
             MouseScrollDownBindingDisplay = new StateBindingDisplayViewModel(profile.MouseScrollDown!);
             {
-                MouseScrollDownBindingDisplay.Content = GetFriendlyContentFromProperty(profile.MouseScrollUp!, plugins);
+                MouseScrollDownBindingDisplay.Content = profile.MouseScrollDown?.GetHumanReadableString();
                 MouseScrollDownBindingDisplay.Description = "Scroll Down";
             }
-
-            SubscribeToEvents();
 
             IsEnabled = true;
         }
@@ -84,37 +80,12 @@ namespace ClickTap.UX.ViewModels.Bindings
             };
         }
 
-        // TODO: Get rid of this
         public override void UpdateProfile(SerializableProfile profile)
         {
-            profile.MouseButtons = Bindings.Select(binding => (SerializableBinding?)binding.PluginProperty).ToArray();
-            profile.MouseScrollUp = MouseScrollUpBindingDisplay.PluginProperty as SerializableBinding;
-            profile.MouseScrollDown = MouseScrollDownBindingDisplay.PluginProperty as SerializableBinding;
+            profile.MouseButtons = Bindings.Select(binding => binding.Store).ToArray();
+            profile.MouseScrollUp = MouseScrollUpBindingDisplay.Store;
+            profile.MouseScrollDown = MouseScrollDownBindingDisplay.Store;
         }
-
-        #region Event Related
-
-        protected override void SubscribeToEvents()
-        {
-            // Bindings
-            base.SubscribeToEvents();
-
-            // Scroll Wheel
-            MouseScrollUpBindingDisplay.BindingChanged += OnBindingsChanged;
-            MouseScrollDownBindingDisplay.BindingChanged += OnBindingsChanged;
-        }
-
-        protected override void UnsubscribeFromEvents()
-        {
-            // Bindings
-            base.UnsubscribeFromEvents();
-
-            // Scroll Wheel
-            MouseScrollUpBindingDisplay.BindingChanged -= OnBindingsChanged;
-            MouseScrollDownBindingDisplay.BindingChanged -= OnBindingsChanged;
-        }
-
-        #endregion
 
         #endregion
     }

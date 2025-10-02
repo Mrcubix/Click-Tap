@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
-using ClickTap.Lib.Entities.Serializable.Bindings;
 using Newtonsoft.Json;
+using OpenTabletDriver.External.Common.Serializables;
 using OpenTabletDriver.Plugin.Tablet;
 
 namespace ClickTap.Lib.Bindings
@@ -10,8 +10,8 @@ namespace ClickTap.Lib.Bindings
     {
         public ThresholdBinding() { }
 
-        public ThresholdBinding(float activationThreshold, SerializableThresholdBinding binding, Dictionary<int, TypeInfo> identifierToPlugin) 
-            : base(binding, identifierToPlugin) 
+        public ThresholdBinding(float activationThreshold, SerializablePluginSettingsStore store, Dictionary<int, TypeInfo> identifierToPlugin) 
+            : base(store, identifierToPlugin) 
         { 
             ActivationThreshold = activationThreshold;
         }
@@ -20,7 +20,6 @@ namespace ClickTap.Lib.Bindings
         ///   The threshold at which the binding should be activated.<br/>
         ///   Usually represented by a slider in the UI.
         /// </summary>
-        [JsonProperty]
         public float ActivationThreshold { set; get; }
 
         public virtual void Invoke(IDeviceReport report, float value)
