@@ -14,7 +14,7 @@ namespace ClickTap.UX.Views;
 
 public partial class MainWindow : AppMainWindow
 {
-    private static readonly BindingEditorDialogViewModel _bindingEditorDialogViewModel = new();
+    private static readonly BindingEditorDialogViewModel _bindingEditorDialogViewModel = new(true);
 
     private bool _isEditorDialogOpen = false;
 
